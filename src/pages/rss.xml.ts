@@ -12,7 +12,7 @@ export async function GET(context: APIContext) {
 
   return rss({
     title: siteConfig.title,
-    description: siteConfig.subtitle || 'No description',
+    description: siteConfig.subtitle || siteConfig.title,
     site: context.site ?? 'https://fuwari.vercel.app',
     items: blog.map(post => {
       return {
