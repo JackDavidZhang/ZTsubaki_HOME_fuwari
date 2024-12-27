@@ -33,8 +33,6 @@ Wuhan, Hubei
 - member of Heptagon SCC Team, HUST
 - member of Lab, UniqueStudio, HUST
 
-## Story
-
 ## Status
 
 ### Learning
