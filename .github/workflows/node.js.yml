@@ -30,7 +30,7 @@ jobs:
     - run: pnpm add sharp
     - run: pnpm run build
     - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@latest
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: page
         folder: dist
