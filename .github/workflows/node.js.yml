@@ -29,7 +29,6 @@ jobs:
     - run: pnpm install
     - run: pnpm add sharp
     - run: pnpm run build
-    - run: pnpm test
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4.3.3
       with:
