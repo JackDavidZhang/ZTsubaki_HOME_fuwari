@@ -37,4 +37,4 @@ jobs:
         branch: page
         folder: dist
     - name: Webhook
-      run curl https://ci.ztsubaki.top/ci?token=123456
+      run: curl https://ci.ztsubaki.top/ci?token=123456
