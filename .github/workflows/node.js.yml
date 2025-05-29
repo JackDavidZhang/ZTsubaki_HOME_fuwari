@@ -37,4 +37,6 @@ jobs:
         branch: page
         folder: dist
     - name: Webhook
-      run: curl https://ci.ztsubaki.top/ci?token=123456
+      env: 
+        CI_TOKEN: ${{secrets.CI_DEPLOY}}
+      run: curl https://ci.ztsubaki.top/ci?token=$CI_TOKEN
