@@ -39,4 +39,5 @@ jobs:
     - name: Webhook
       env: 
         CI_TOKEN: ${{secrets.CI_DEPLOY}}
-      run: curl https://ci.ztsubaki.top/ci?token=$CI_TOKEN
+        COMMIT: ${{github.sha}}
+      run: curl https://ci.ztsubaki.top/ci?token=$CI_TOKEN&commit=$COMMIT
