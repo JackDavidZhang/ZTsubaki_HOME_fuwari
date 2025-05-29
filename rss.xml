@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://ssl.ztsubaki.xyz/</link><language>zh_CN</language><item><title>图论算法四：图的存储与遍历</title><link>https://ssl.ztsubaki.xyz/posts/24/24/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/24/24/</guid><description>图论算法系列第四篇，讲解图基本知识的存储方式</description><pubDate>Wed, 30 Apr 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 图&lt;/h2&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://www.ztsubaki.top/</link><language>zh_CN</language><item><title>图论算法四：图的存储与遍历</title><link>https://www.ztsubaki.top/posts/24/24/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/24/24/</guid><description>图论算法系列第四篇，讲解图基本知识的存储方式</description><pubDate>Wed, 30 Apr 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 图&lt;/h2&gt;
 &lt;p&gt;图是一个二元组$G=&amp;lt;V,E&amp;gt;$，其中，$V$是一个由点组成的集合，$\lvert V\rvert$称为该图的阶数，$E$是一个由来自$V$中的元素组成的二元组构成的集合，若该二元组有序，则称该图为有序图，反之称为无序图&lt;/p&gt;
 &lt;h3&gt;1.1. 常用概念&lt;/h3&gt;
 &lt;ul&gt;
@@ -36,7 +36,7 @@
 &lt;p&gt;当链表与边集数组结合，我们可以仅保留一个记录与节点相邻的第一条边编号的数组&lt;code&gt;head[]&lt;/code&gt;，而对边集数组中的每条边，保存与其相邻的边的编号，也可以理解成链表中的&lt;code&gt;next&lt;/code&gt;，也类似于二叉树的链式存储，这样的方式称为链式前向星&lt;/p&gt;
 &lt;p&gt;链式前向星和用链表存储的邻接表实际上没有本质区别，实际使用中不会也没必要特意区分这些概念&lt;/p&gt;
 &lt;p&gt;链式前向星可以快速查找一个点的所有边，符合大多数算法的需求，是最常用的存储方式&lt;/p&gt;
-</content:encoded></item><item><title>C++基础四：函数与引用</title><link>https://ssl.ztsubaki.xyz/posts/14/14/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/14/14/</guid><description>2025年春，C++复习笔记</description><pubDate>Sun, 02 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;1. 函数&lt;/h1&gt;
+</content:encoded></item><item><title>C++基础四：函数与引用</title><link>https://www.ztsubaki.top/posts/14/14/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/14/14/</guid><description>2025年春，C++复习笔记</description><pubDate>Sun, 02 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;1. 函数&lt;/h1&gt;
 &lt;p&gt;在&lt;code&gt;C++&lt;/code&gt;中，函数由两部分组成&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;函数原型/函数声明：提供函数名、返回值和参数列表，每个调用函数的文件中都要声明函数，一般写在头文件里&lt;/li&gt;
@@ -239,7 +239,7 @@ auto add(T1 x,T2 y) -&amp;gt; decltype(x+y)
 &lt;p&gt;:::warning&lt;/p&gt;
 &lt;p&gt;使用引用作为返回值时要注意，只能引用参数或全局变量，不能引用函数内部定义的量，这些量在函数结束后就会被回收，会导致引用指向未分配的内存区域，产生严重后果&lt;/p&gt;
 &lt;p&gt;:::&lt;/p&gt;
-</content:encoded></item><item><title>C++基础三：变量、常量与复合数据类型</title><link>https://ssl.ztsubaki.xyz/posts/13/13/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/13/13/</guid><description>2025年春，C++复习笔记</description><pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 变量与常量&lt;/h2&gt;
+</content:encoded></item><item><title>C++基础三：变量、常量与复合数据类型</title><link>https://www.ztsubaki.top/posts/13/13/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/13/13/</guid><description>2025年春，C++复习笔记</description><pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 变量与常量&lt;/h2&gt;
 &lt;p&gt;使用声明语句可以声明一个变量&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;type name;&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;而变量可以先声明，后赋值，且可以多次赋值，但请确保使用前被赋值&lt;/p&gt;
@@ -384,7 +384,7 @@ std::cout &amp;lt;&amp;lt; (e1==value2);//true
 &lt;li&gt;当有符号数转换成无符号数时，会直接把补码当作无符号数处理&lt;/li&gt;
 &lt;li&gt;当其他类型转换成布尔型时，只要不是全&lt;code&gt;0&lt;/code&gt;都会被转换为&lt;code&gt;true&lt;/code&gt;，反之，&lt;code&gt;true&lt;/code&gt;会被转换为&lt;code&gt;1&lt;/code&gt;，&lt;code&gt;false&lt;/code&gt;会被转换成&lt;code&gt;0&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-</content:encoded></item><item><title>阶乘因数问题</title><link>https://ssl.ztsubaki.xyz/posts/12/12/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/12/12/</guid><description>妙哇</description><pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 阶乘的因数个数&lt;/h2&gt;
+</content:encoded></item><item><title>阶乘因数问题</title><link>https://www.ztsubaki.top/posts/12/12/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/12/12/</guid><description>妙哇</description><pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 阶乘的因数个数&lt;/h2&gt;
 &lt;p&gt;考虑一个正整数$n$的阶乘$n!$，求它有多少个质因数$p$，即求最大$i$，使$n!=kp^i$&lt;/p&gt;
 &lt;p&gt;显然，所有$p$的倍数都含有至少一个因数$p$，从$1$到$n$的$n$个数中有$\lfloor\dfrac{n}{p}\rfloor$个数是$p$的倍数&lt;/p&gt;
 &lt;p&gt;同样的，所有$p^2$的倍数都含有至少两个因数$p$，从$1$到$n$的$n$个数中有$\lfloor\dfrac{n}{p^2}\rfloor$个数是$p^2$的倍数&lt;/p&gt;
@@ -410,7 +410,7 @@ std::cout &amp;lt;&amp;lt; (e1==value2);//true
 &lt;p&gt;来到二进制减法中，对于$m$中某个为$1$的位，如果$n$中对应位为$1$，那么计算减法时$n$就刚好减少一个$1$，而如果$n$中对应位为$0$，则必然产生退位$(n\ge m)$，必然增加$n$中$1$的个数，因此，对于$m$中所有为$1$的位，只有$n$中每个对应位都为$1$时，上述式子才会成立&lt;/p&gt;
 &lt;p&gt;用按位与$(&amp;amp;)$描述这一条件就是$n&amp;amp;m=m$&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;综上，我们得出结论$C^m_n\mod2=\begin{cases}0,n&amp;amp;m\ne m\1,n&amp;amp;m=m\end{cases}$&lt;/strong&gt;&lt;/p&gt;
-</content:encoded></item><item><title>C++基础二：编译指令</title><link>https://ssl.ztsubaki.xyz/posts/11/11/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/11/11/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 26 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 包含文件&lt;/h2&gt;
+</content:encoded></item><item><title>C++基础二：编译指令</title><link>https://www.ztsubaki.top/posts/11/11/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/11/11/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 26 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 包含文件&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;#include&lt;/code&gt;编译指令可以将外部文件包含在源文件中，在预编译时，预编译器会使用外部文件的内容替换掉&lt;code&gt;#include&lt;/code&gt;指令&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;C++&lt;/code&gt;中，如果需要使用其它文件中的函数，甚至是编译好的库、系统调用函数，需要提供函数声明以告诉编译器函数的形式，并等到链接时再从外部查找函数的内容，而一个库往往包含大量的函数声明、复合类型、符号常量的定义等，这些定义错综复杂，为了方便所有程序使用这些库，开发者们往往把所有这些调用库需要的信息放在一个文件中，称为&lt;strong&gt;头文件&lt;/strong&gt;，常用扩展名&lt;code&gt;.h&lt;/code&gt;或&lt;code&gt;.hpp&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;头文件也是一个合法的&lt;code&gt;C++&lt;/code&gt;源文件，只是里面一般只包含函数声明、复合类型的定义、符号常量等需要在文件之间共享的内容，而不包含具体实现，在链接时需要链接含有具体实现的目标文件&lt;/p&gt;
@@ -512,7 +512,7 @@ std::cout &amp;lt;&amp;lt; bob::a;//2
 &lt;p&gt;如&lt;code&gt;using namespace std;&lt;/code&gt;会把所有用到的量（而非定义的）量视为&lt;code&gt;std&lt;/code&gt;名称空间下的量，免去每次都写&lt;code&gt;std&lt;/code&gt;的麻烦，同时需要使用其他名称空间的量时也可以指定其他的名称空间来覆盖掉&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;using&lt;/code&gt;指令和编译指令的作用范围都仅限当前作用域，即当前大括号内，&lt;code&gt;using&lt;/code&gt;编译指令也可以嵌套&lt;/p&gt;
 &lt;p&gt;由于&lt;code&gt;using&lt;/code&gt;编译指令会引入大量用不到的量，可能产生名称冲突，带来不必要的麻烦，故不推荐使用&lt;code&gt;using&lt;/code&gt;编译指令&lt;/p&gt;
-</content:encoded></item><item><title>C++基础一：基础元素</title><link>https://ssl.ztsubaki.xyz/posts/9/9/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/9/9/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. C++简介&lt;/h2&gt;
+</content:encoded></item><item><title>C++基础一：基础元素</title><link>https://www.ztsubaki.top/posts/9/9/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/9/9/</guid><description>2025年春，C++复习笔记</description><pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. C++简介&lt;/h2&gt;
 &lt;h3&gt;1.1. C++简史&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;20世纪70年代，贝尔实验室的Dennins Ritchie为了开发&lt;code&gt;UNIX&lt;/code&gt;系统而开发了&lt;code&gt;C&lt;/code&gt;语言&lt;/li&gt;
@@ -1243,7 +1243,7 @@ while(condition)
 &lt;li&gt;单行注释：双斜杠&lt;code&gt;//&lt;/code&gt;后面直到行末的所有内容都会被视为注释&lt;/li&gt;
 &lt;li&gt;多行注释：&lt;code&gt;/**&lt;/code&gt;和&lt;code&gt;**/&lt;/code&gt;之间，无论多少行都会被视为注释&lt;/li&gt;
 &lt;/ul&gt;
-</content:encoded></item><item><title>图论算法三：树的简单应用</title><link>https://ssl.ztsubaki.xyz/posts/8/8/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/8/8/</guid><description>图论算法系列第三篇，讲解哈夫曼树、哈希表、字符搜索树这些树的简单应用。</description><pubDate>Mon, 20 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.哈夫曼树&lt;/h2&gt;
+</content:encoded></item><item><title>图论算法三：树的简单应用</title><link>https://www.ztsubaki.top/posts/8/8/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/8/8/</guid><description>图论算法系列第三篇，讲解哈夫曼树、哈希表、字符搜索树这些树的简单应用。</description><pubDate>Mon, 20 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.哈夫曼树&lt;/h2&gt;
 &lt;h3&gt;1.1.哈夫曼编码&lt;/h3&gt;
 &lt;p&gt;通常的编码方法有定长编码和不定长编码两种，编码的目的是寻找合适的编码方案使总码长度最短。定长编码常常采用类似哈希的方案，不定长编码则会尽可能使常用的字符编码短，不常用的字符编码长，同时保持无二义性。&lt;/p&gt;
 &lt;p&gt;1952年，数学家D.A.Huffman提出了一种基于哈夫曼树的编码方法，这棵树将被编码字符作为叶子节点，将该字符的使用频率作为权值反复合并，最后构成一棵树，从根到叶子节点的路径即为其编码。&lt;/p&gt;
@@ -1297,7 +1297,7 @@ while(condition)
 &lt;h2&gt;3. 二叉搜索树&lt;/h2&gt;
 &lt;p&gt;在二叉树的每个节点上填入数字，并严格按照&lt;code&gt;左子树&amp;lt;根&amp;lt;右子树&lt;/code&gt;的顺序排列，就可以形成一个基本的二叉搜索树，在数据足够平均的最理想状态下，可以实现以$$O(\log n)$$复杂度查找第&lt;code&gt;k&lt;/code&gt;大的数字或查找某个数字的位置&lt;/p&gt;
 &lt;p&gt;最差的情况下，二叉搜索树会退化到$$O(n)$$的复杂度，因此在二叉搜索树的基础上我们衍生出了很多平衡二叉树，此处不再赘述&lt;/p&gt;
-</content:encoded></item><item><title>图论算法一：树的基本概念</title><link>https://ssl.ztsubaki.xyz/posts/6/6/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/6/6/</guid><description>图论算法系列第一篇，讲解树的数学定义</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.自由树&lt;/h2&gt;
+</content:encoded></item><item><title>图论算法一：树的基本概念</title><link>https://www.ztsubaki.top/posts/6/6/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/6/6/</guid><description>图论算法系列第一篇，讲解树的数学定义</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.自由树&lt;/h2&gt;
 &lt;p&gt;连通的、无环的无向图。&lt;/p&gt;
 &lt;p&gt;自由树$G=(V,E)$有以下性质：&lt;/p&gt;
 &lt;ul&gt;
@@ -1388,7 +1388,7 @@ while(condition)
 &lt;p&gt;&lt;img src=&quot;1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;转换为：&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</content:encoded></item><item><title>图论算法二：树的存储与遍历</title><link>https://ssl.ztsubaki.xyz/posts/7/7/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/7/7/</guid><description>图论算法系列第二篇，讲解树的两种存储方式和二叉树的遍历与还原</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.树的存储&lt;/h2&gt;
+</content:encoded></item><item><title>图论算法二：树的存储与遍历</title><link>https://www.ztsubaki.top/posts/7/7/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/7/7/</guid><description>图论算法系列第二篇，讲解树的两种存储方式和二叉树的遍历与还原</description><pubDate>Sun, 19 Jan 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.树的存储&lt;/h2&gt;
 &lt;h3&gt;1.1.顺序存储&lt;/h3&gt;
 &lt;p&gt;使用一段连续的存储空间，存储所有的树的信息&lt;/p&gt;
 &lt;table&gt;
@@ -1567,7 +1567,7 @@ void abr(int x)
 &lt;blockquote&gt;
 &lt;p&gt;例题：给出一个节点由大写字母表示的二叉树的前序遍历和中序遍历，求该二叉树的后序遍历。&lt;/p&gt;
 &lt;/blockquote&gt;
-</content:encoded></item><item><title>2024 我的故事未写完</title><link>https://ssl.ztsubaki.xyz/posts/5/5/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/5/5/</guid><description>2024年度总结</description><pubDate>Tue, 31 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;2024，从飞舞的烟花中开始。&lt;/p&gt;
+</content:encoded></item><item><title>2024 我的故事未写完</title><link>https://www.ztsubaki.top/posts/5/5/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/5/5/</guid><description>2024年度总结</description><pubDate>Tue, 31 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;2024，从飞舞的烟花中开始。&lt;/p&gt;
 &lt;p&gt;2024，在安静的夜空中结束。&lt;/p&gt;
 &lt;p&gt;2023年12月31日，在迟到了数月的生日中，我迎来了自己的的18岁。&lt;/p&gt;
 &lt;p&gt;那个夜晚，我在小城喧闹的广场上结束了2023的最后一晚，绚丽的焰火照亮了天边，火药的气味助长着热烈的氛围，愿望随着孔明灯飞向无边的夜空。&lt;/p&gt;
@@ -1665,7 +1665,7 @@ void abr(int x)
 &lt;/blockquote&gt;
 &lt;p&gt;就像2023年初听到的那首歌，我的故事未写完。&lt;/p&gt;
 &lt;p&gt;&amp;lt;iframe width=&quot;100%&quot; height=&quot;468&quot;  src=&quot;//player.bilibili.com/player.html?isOutside=true&amp;amp;bvid=BV1JG4y1W7ub&amp;amp;t=35.371416&quot; scrolling=&quot;no&quot; border=&quot;0&quot; frameborder=&quot;no&quot; framespacing=&quot;0&quot; allowfullscreen=&quot;true&quot;&amp;gt;&amp;lt;/iframe&amp;gt;&lt;/p&gt;
-</content:encoded></item><item><title>Arch Linux简单安装配置</title><link>https://ssl.ztsubaki.xyz/posts/4/4/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/4/4/</guid><description>记录KDE、Hyprland桌面环境下Arch Linux的安装配置和简单美化</description><pubDate>Fri, 27 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;:::important&lt;/p&gt;
+</content:encoded></item><item><title>Arch Linux简单安装配置</title><link>https://www.ztsubaki.top/posts/4/4/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/4/4/</guid><description>记录KDE、Hyprland桌面环境下Arch Linux的安装配置和简单美化</description><pubDate>Fri, 27 Dec 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;:::important&lt;/p&gt;
 &lt;p&gt;仅记录个人配置，详细配置请查看&lt;a href=&quot;https://wiki.archlinuxcn.org/wiki/%E9%A6%96%E9%A1%B5&quot;&gt;ArchWiki&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;:::&lt;/p&gt;
 &lt;h2&gt;1.安装&lt;/h2&gt;
@@ -2281,7 +2281,7 @@ options nvidia_drm modeset=1 fbdev=1
 &lt;pre&gt;&lt;code&gt;sudo mkinitcpio -P
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;重启生效，之后运行&lt;code&gt;nvidia-smi&lt;/code&gt;查看信息面板以验证是否生效&lt;/p&gt;
-</content:encoded></item><item><title>递归与暴力枚举</title><link>https://ssl.ztsubaki.xyz/posts/3/3/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/3/3/</guid><description>刑</description><pubDate>Sun, 08 Jan 2023 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.递归&lt;/h2&gt;
+</content:encoded></item><item><title>递归与暴力枚举</title><link>https://www.ztsubaki.top/posts/3/3/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/3/3/</guid><description>刑</description><pubDate>Sun, 08 Jan 2023 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1.递归&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;递归（Recursion）：一个过程或函数在其定义或说明中有直接或间接调用自身的一种方法&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2680,7 +2680,7 @@ int main()
 &lt;p&gt;例题2 P1014 Cantor表&lt;/p&gt;
 &lt;p&gt;例题3 P1469 找筷子&lt;/p&gt;
 &lt;/blockquote&gt;
-</content:encoded></item><item><title>计算机网络安全技术</title><link>https://ssl.ztsubaki.xyz/posts/2/2/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/2/2/</guid><description>刑</description><pubDate>Sun, 16 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;计算机网络基础&lt;/h2&gt;
+</content:encoded></item><item><title>计算机网络安全技术</title><link>https://www.ztsubaki.top/posts/2/2/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/2/2/</guid><description>刑</description><pubDate>Sun, 16 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;计算机网络基础&lt;/h2&gt;
 &lt;h3&gt;TCP/IP协议架构&lt;/h3&gt;
 &lt;p&gt;TCP/IP(Transmission Control Protocol/Internet Protocol，传输控制协议/网际协议)1973年由斯坦福大学的文顿·瑟夫与卡恩提出，是一系列以TCP协议、IP协议为中心的协议组成的协议簇，它定义了一套数据在通信介质中传输的统一标准和规范，是全球网络中最广泛成熟的网络协议标准，我们目前使用的网络均是基于此标准的。&lt;/p&gt;
 &lt;ul&gt;
@@ -3245,7 +3245,7 @@ document.write(&quot;Hello &quot;+username);
 &lt;ul&gt;
 &lt;li&gt;SSL&lt;/li&gt;
 &lt;/ul&gt;
-</content:encoded></item><item><title>写于v1.0.1_DEV发布</title><link>https://ssl.ztsubaki.xyz/posts/1/1/</link><guid isPermaLink="true">https://ssl.ztsubaki.xyz/posts/1/1/</guid><description>我将一直前行</description><pubDate>Mon, 03 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;em&gt;三年，对于一个人意味着什么——&lt;/em&gt;&lt;/p&gt;
+</content:encoded></item><item><title>写于v1.0.1_DEV发布</title><link>https://www.ztsubaki.top/posts/1/1/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/1/1/</guid><description>我将一直前行</description><pubDate>Mon, 03 Oct 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;em&gt;三年，对于一个人意味着什么——&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;五年，对于一个人又意味着什么——&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;该项目于2021年确立。经过一年漫长的等待，在2022年开启，并于今日发布第一个DEV版本。&lt;/p&gt;
 &lt;p&gt;这是一个三年不变的初心，也是一份五年的坚守。&lt;/p&gt;

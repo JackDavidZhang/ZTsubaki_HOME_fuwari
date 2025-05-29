@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ssl.ztsubaki.xyz/sitemap-index.xml
+Sitemap: https://www.ztsubaki.top/sitemap-index.xml
