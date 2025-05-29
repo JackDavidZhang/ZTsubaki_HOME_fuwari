@@ -40,4 +40,4 @@ jobs:
       env: 
         CI_TOKEN: ${{secrets.CI_DEPLOY}}
         COMMIT: ${{github.sha}}
-      run: curl --no-progress-bar https://ci.ztsubaki.top/ci?token=$CI_TOKEN&commit=$COMMIT
+      run: curl -s "https://ci.ztsubaki.top/ci?token=$CI_TOKEN&commit=$COMMIT"
