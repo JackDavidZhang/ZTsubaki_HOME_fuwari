@@ -25,12 +25,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm i -g pnpm
-    - run: pnpm install
-    - run: pnpm add sharp
-    - run: pnpm run build
+    - name: Setup pnpm environment
+      run: npm i -g pnpm
+           pnpm install
+           pnpm add sharp
+    - name: Build
+      run: pnpm run build
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: page
         folder: dist
+    - name: Webhook
+      run curl https://ci.ztsubaki.top/ci?token=123456
