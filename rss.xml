@@ -1,4 +1,111 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://www.ztsubaki.top/</link><language>zh_CN</language><item><title>图论算法四：图的存储与遍历</title><link>https://www.ztsubaki.top/posts/24/24/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/24/24/</guid><description>图论算法系列第四篇，讲解图基本知识的存储方式</description><pubDate>Wed, 30 Apr 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 图&lt;/h2&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://www.ztsubaki.top/</link><language>zh_CN</language><item><title>Linux SUID与shell脚本问题</title><link>https://www.ztsubaki.top/posts/26/26/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/26/26/</guid><description>SUID是Linux的一个特殊权限，但是不能在脚本中使用</description><pubDate>Tue, 24 Jun 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. uid与SUID&lt;/h2&gt;
+&lt;h3&gt;1.1. uid&lt;/h3&gt;
+&lt;p&gt;Linux使用&lt;code&gt;uid&lt;/code&gt;标识用户，每个用户有一个唯一的&lt;code&gt;uid&lt;/code&gt;，&lt;code&gt;root&lt;/code&gt;的&lt;code&gt;uid&lt;/code&gt;为0，其他可登录用户的&lt;code&gt;uid&lt;/code&gt;一般从1000开始，使用&lt;code&gt;id&lt;/code&gt;指令可以查看自己的&lt;code&gt;uid&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;实际上一个进程运行中主要有3个&lt;code&gt;uid&lt;/code&gt;，分别是&lt;code&gt;real uid&lt;/code&gt;，&lt;code&gt;saved uid&lt;/code&gt;和&lt;code&gt;effective uid&lt;/code&gt;，&lt;code&gt;real uid&lt;/code&gt;用于表示进程的实际调用者，&lt;code&gt;saved uid&lt;/code&gt;用于在切换用户时保存&lt;code&gt;uid&lt;/code&gt;，&lt;code&gt;effective uid&lt;/code&gt;则是真正进行访问控制的&lt;code&gt;uid&lt;/code&gt;，所有权限都是基于&lt;code&gt;effective uid&lt;/code&gt;的，这才是实际有用的&lt;code&gt;uid&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;默认情况下三个&lt;code&gt;uid&lt;/code&gt;相同，&lt;code&gt;uid&lt;/code&gt;为&lt;code&gt;0(root)&lt;/code&gt;的用户可以随意更改三个&lt;code&gt;uid&lt;/code&gt;，而普通用户则只能把&lt;code&gt;effective uid&lt;/code&gt;更改为另外两个&lt;code&gt;uid&lt;/code&gt;之一&lt;/p&gt;
+&lt;h3&gt;1.2. SUID&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;SetUID,SUID&lt;/code&gt;是&lt;code&gt;linux&lt;/code&gt;中的特殊权限位，用在所有者的执行位，表示为&lt;code&gt;s&lt;/code&gt;，如果所有者没有执行权限则表示为&lt;code&gt;S&lt;/code&gt;，数字表示为&lt;code&gt;4000&lt;/code&gt;，即对应第12个权限位&lt;/p&gt;
+&lt;p&gt;带有SUID位的&lt;strong&gt;二进制可执行文件&lt;/strong&gt;，在执行时&lt;code&gt;euid&lt;/code&gt;会被替换为所有者的&lt;code&gt;euid&lt;/code&gt;，即以所有者的身份执行&lt;/p&gt;
+&lt;p&gt;如以下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;stdlib.h&amp;gt;
+#include&amp;lt;unistd.h&amp;gt;
+#include&amp;lt;sys/wait.h&amp;gt;
+
+int main()
+{
+        pid_t pid;
+        pid = fork();
+        if(pid==-1) exit(-1);
+        if(pid)
+                waitpid(pid,NULL,0);
+        else
+                execlp(&quot;id&quot;,&quot;id&quot;,NULL);
+        return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;编译之后将拥有者改为&lt;code&gt;root&lt;/code&gt;，直接运行，得到&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uid=1000(ztsubaki) gid=1000(ztsubaki) groups=1000(ztsubaki),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),107(netdev)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;当我们为其增加&lt;code&gt;SUID&lt;/code&gt;位&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; sudo chmod u+s ./a.out
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其表示为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;-rwsr-xr-x 1 root     root       16048 Jul 14 20:31 a.out
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;再次运行程序，输出为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uid=1000(ztsubaki) gid=1000(ztsubaki) euid=0(root) groups=1000(ztsubaki),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),107(netdev)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可见后者新增了&lt;code&gt;euid=0(root)&lt;/code&gt;，表示&lt;code&gt;euid&lt;/code&gt;与&lt;code&gt;real uid&lt;/code&gt;不同，为&lt;code&gt;root&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;对于&lt;code&gt;SUID&lt;/code&gt;的作用，最常见的还是给予运行者有限的&lt;code&gt;root&lt;/code&gt;权限，如&lt;code&gt;passwd&lt;/code&gt;命令允许普通用户修改自己的密码，这就必须更改保存密码用的&lt;code&gt;shadow&lt;/code&gt;文件，改文件肯定不可能开放所有人的读写权限，实际上该文件权限为&lt;code&gt;-rw-r-----&lt;/code&gt;，此时就必须使用&lt;code&gt;SUID&lt;/code&gt;以&lt;code&gt;root&lt;/code&gt;的身份运行&lt;code&gt;passwd&lt;/code&gt;才能修改密码，同时&lt;code&gt;passwd&lt;/code&gt;命令对应的可执行程序普通用户无法轻易更改，也确保了无法修改别人的密码&lt;/p&gt;
+&lt;p&gt;可以查看&lt;code&gt;passwd&lt;/code&gt;的权限位&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ls -l /usr/bin/passwd
+-rwsr-xr-x 1 root root 64152 May 30  2024 /usr/bin/passwd
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;类似地，对于&lt;code&gt;gid&lt;/code&gt;，也有&lt;code&gt;egid&lt;/code&gt;和&lt;code&gt;SGID&lt;/code&gt;，&lt;code&gt;SGID&lt;/code&gt;位于第11位，即&lt;code&gt;2000&lt;/code&gt;，记为写在组执行权限上的&lt;code&gt;s&lt;/code&gt;或&lt;code&gt;S&lt;/code&gt;，作用与&lt;code&gt;SUID&lt;/code&gt;基本一致&lt;/p&gt;
+&lt;h2&gt;2. SUID与脚本&lt;/h2&gt;
+&lt;p&gt;上文提到，&lt;code&gt;SUID&lt;/code&gt;只能作用于二进制可执行文件，无法作用于脚本，这是因为脚本的解释器与脚本本身分离，不受脚本权限的保护，若解释器权限较弱，通过替换解释器就可以执行任意别的内容，如果此时&lt;code&gt;SUID&lt;/code&gt;生效就比较危险，故&lt;code&gt;linux&lt;/code&gt;不允许脚本使用&lt;code&gt;SUID&lt;/code&gt;，为脚本设置的&lt;code&gt;SUID&lt;/code&gt;将会失效&lt;/p&gt;
+&lt;p&gt;如果在知道风险之后依然有使用脚本的需求，我们可能会很自然想到在二进制可执行程序中调用脚本，比如下面的程序&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;stdlib.h&amp;gt;
+#include&amp;lt;unistd.h&amp;gt;
+#include&amp;lt;sys/wait.h&amp;gt;
+
+int main()
+{
+        pid_t pid;
+        pid = fork();
+        if(pid==-1) exit(-1);
+        if(pid)
+                waitpid(pid,NULL,0);
+        else
+                execlp(&quot;sh&quot;,&quot;sh&quot;,&quot;./t.sh&quot;,NULL);
+        return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;脚本如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;id
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;输出如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uid=1000(ztsubaki) gid=1000(ztsubaki) groups=1000(ztsubaki),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),107(netdev)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;并没有出现预期结果&lt;/p&gt;
+&lt;p&gt;经过分析，我们可以在&lt;code&gt;sh&lt;/code&gt;的&lt;code&gt;man&lt;/code&gt;文件中找到一句话&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;-p priviliged    Do not attempt to reset effective uid if it does not match uid. This is not set by default to help avoid incorrect usage by setuid root programs via system(3) or popen(3).
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可见，&lt;code&gt;sh&lt;/code&gt;实际上默认会在&lt;code&gt;real uid&lt;/code&gt;与&lt;code&gt;effective uid&lt;/code&gt;不同时替换掉&lt;code&gt;euid&lt;/code&gt;，因此，我们在系统调用中加入&lt;code&gt;-p&lt;/code&gt;参数，即&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;                execlp(&quot;sh&quot;,&quot;sh&quot;,&quot;-p&quot;,&quot;./t.sh&quot;,NULL);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这样就可以得到预期结果&lt;/p&gt;
+&lt;p&gt;:::caution&lt;/p&gt;
+&lt;p&gt;无论如何请务必谨慎使用该方法&lt;/p&gt;
+&lt;p&gt;:::&lt;/p&gt;
+&lt;p&gt;最后，我们一直通过&lt;code&gt;fork&lt;/code&gt;和&lt;code&gt;exec&lt;/code&gt;产生子进程测试，如果直接使用&lt;code&gt;system&lt;/code&gt;呢&lt;/p&gt;
+&lt;p&gt;使用如下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include&amp;lt;stdlib.h&amp;gt;
+#include&amp;lt;unistd.h&amp;gt;
+#include&amp;lt;sys/wait.h&amp;gt;
+
+int main()
+{
+        pid_t pid;
+        system(&quot;id&quot;);
+        pid = fork();
+        if(pid==-1) exit(-1);
+        if(pid)
+                waitpid(pid,NULL,0);
+        else
+                execlp(&quot;id&quot;,&quot;id&quot;,NULL);
+        return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;更改所有者，设置&lt;code&gt;SUID&lt;/code&gt;后运行得到&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uid=1000(ztsubaki) gid=1000(ztsubaki) groups=1000(ztsubaki),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),107(netdev)
+uid=1000(ztsubaki) gid=1000(ztsubaki) euid=0(root) groups=1000(ztsubaki),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),107(netdev)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;发现&lt;code&gt;system&lt;/code&gt;调用中&lt;code&gt;SUID&lt;/code&gt;还是没有生效，通过&lt;code&gt;strace&lt;/code&gt;可以发现&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[pid  6020] execve(&quot;/bin/sh&quot;, [&quot;sh&quot;, &quot;-c&quot;, &quot;--&quot;, &quot;id&quot;], 0x7ffcfa8f9238 /* 34 vars */ &amp;lt;unfinished ...&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;system&lt;/code&gt;本质上是调用了&lt;code&gt;sh -c&lt;/code&gt;来执行命令行，在这个过程中就会替换掉&lt;code&gt;euid&lt;/code&gt;，这就导致&lt;code&gt;SUID&lt;/code&gt;不会正常生效了&lt;/p&gt;
+</content:encoded></item><item><title>图论算法四：图的存储与遍历</title><link>https://www.ztsubaki.top/posts/24/24/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/24/24/</guid><description>图论算法系列第四篇，讲解图基本知识的存储方式</description><pubDate>Wed, 30 Apr 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 图&lt;/h2&gt;
 &lt;p&gt;图是一个二元组$G=&amp;lt;V,E&amp;gt;$，其中，$V$是一个由点组成的集合，$\lvert V\rvert$称为该图的阶数，$E$是一个由来自$V$中的元素组成的二元组构成的集合，若该二元组有序，则称该图为有序图，反之称为无序图&lt;/p&gt;
 &lt;h3&gt;1.1. 常用概念&lt;/h3&gt;
 &lt;ul&gt;
