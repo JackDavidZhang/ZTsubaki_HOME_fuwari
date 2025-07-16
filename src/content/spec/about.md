@@ -38,8 +38,8 @@ Wuhan, Hubei
 ### Learning
 
 - [ ] C/C++(review)
-- [ ] Linux
-- [ ] Algorithm(further)
+- [ ] Linux/System
+- [ ] Network
 - [ ] Rust
 - [ ] Go
 - [ ] front-end technology stack(review)
@@ -62,4 +62,5 @@ Wuhan, Hubei
 
 ::github{repo="JackDavidZhang/SOJ"}
 
-*Updated 2024.12*
+*Updated 2025.7
+
