@@ -1,4 +1,425 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://www.ztsubaki.top/</link><language>zh_CN</language><item><title>Linux SUID与shell脚本问题</title><link>https://www.ztsubaki.top/posts/26/26/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/26/26/</guid><description>SUID是Linux的一个特殊权限，但是不能在脚本中使用</description><pubDate>Tue, 24 Jun 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. uid与SUID&lt;/h2&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ZTsubaki_HOME</title><description>ZTsubaki_HOME</description><link>https://www.ztsubaki.top/</link><language>zh_CN</language><item><title>运维笔记</title><link>https://www.ztsubaki.top/posts/28/28/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/28/28/</guid><description>一些运维过程中的小tips</description><pubDate>Mon, 11 Aug 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 软件包&lt;/h2&gt;
+&lt;h3&gt;1. DHCP&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;isc-shcp-server&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;提供简易的DHCP服务器基本功能，开箱即用&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;dnsmasq&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;本地DNS服务器+DHCP服务器，功能更强大，配置略复杂&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;2. URL拦截&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;Squid&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;本地http缓存服务器，支持透明代理，有强大的ACL功能，可以过滤HTTP流量，借助ssl-bump配合中间人攻击还可以解密过滤https流量&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</content:encoded></item><item><title>从源码开始引导一个简易Linux系统</title><link>https://www.ztsubaki.top/posts/29/29/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/29/29/</guid><description>通过一个小实验深入理解Linux的启动过程</description><pubDate>Mon, 11 Aug 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. 理论&lt;/h2&gt;
+&lt;p&gt;当我们接通计算机的电源，&lt;code&gt;BIOS&lt;/code&gt;/&lt;code&gt;UEFI&lt;/code&gt;在完成自检后会根据预先设定读取硬盘上的&lt;code&gt;MBR&lt;/code&gt;/&lt;code&gt;ESP&lt;/code&gt;分区内的记录，启动&lt;code&gt;bootloader&lt;/code&gt;，如&lt;code&gt;Windows&lt;/code&gt;下的&lt;code&gt;BOOTMGR&lt;/code&gt;和&lt;code&gt;Linux&lt;/code&gt;下常用的&lt;code&gt;grub&lt;/code&gt;。对于&lt;code&gt;Linux&lt;/code&gt;，&lt;code&gt;bootloader&lt;/code&gt;会将&lt;code&gt;kernel&lt;/code&gt;加载到内存中，然后将系统交给&lt;code&gt;kernel&lt;/code&gt;，然而此时的内存中只剩下一个&lt;code&gt;kernel&lt;/code&gt;的二进制代码，没有任何别的数据，没有文件系统也没有用户态的程序，从&lt;code&gt;kernel&lt;/code&gt;到&lt;code&gt;shell&lt;/code&gt;之间。&lt;code&gt;Linux&lt;/code&gt;还需要一个初始化的过程。&lt;/p&gt;
+&lt;h3&gt;过程分析&lt;/h3&gt;
+&lt;h4&gt;1. 内核空间&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;/proc/cmdline&lt;/code&gt;中保存了&lt;code&gt;bootloader&lt;/code&gt;调用&lt;code&gt;kernel&lt;/code&gt;时传递的参数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cat /proc/cmdline
+BOOT_IMAGE=/vmlinuz-linux root=UUID=a9c82f40-f0ff-4af3-b630-ddc3d0d0f781 rw loglevel=3 quiet
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;从中可见，我们真正在启动时加载的kernel位于&lt;code&gt;/vmlinuz-linux&lt;/code&gt;，即&lt;code&gt;/boot/vmlinuz-linux&lt;/code&gt;，查看该文件得&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;file /boot/vmlinuz-linux
+/boot/vmlinuz-linux: Linux kernel x86 boot executable, bzImage, version 6.15.9-arch1-1 (linux@archlinux) #1 SMP PREEMPT_DYNAMIC Sat, 02 Aug 2025 01:20:06 +0000, RO-rootFS, Normal VGA, setup size 512*39, syssize 0xf1020, jump 0x26c 0x8cd88ec0fc8cd239 instruction, protocol 2.15, from protected-mode code at offset 0x2cc 0xed7b91 bytes ZST compressed, relocatable, handover offset 0xf012a0, legacy 64-bit entry point, can be above 4G, 32-bit EFI handoff entry point, 64-bit EFI handoff entry point, EFI kexec boot support, xloadflags bit 5, max cmdline size 2047, init_size 0x425b000
+ls -lh /boot/vmlinuz-linux
+-rwxr-xr-x   1 root root 15.1M Aug  3 21:44 /boot/vmlinuz-linux
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这是一个内核&lt;code&gt;6.15.9&lt;/code&gt;的镜像，大小仅&lt;code&gt;15.1MB&lt;/code&gt;，里面仅仅包含最基本的&lt;code&gt;kernel&lt;/code&gt;，没有任何用户态的程序，也缺少复杂的驱动程序，理论上来说，&lt;code&gt;kernel&lt;/code&gt;在加载完成后可以直接根据启动参数指定的设备挂载硬盘上的&lt;code&gt;rootfs&lt;/code&gt;，但是，此时并没有&lt;code&gt;rootfs&lt;/code&gt;，更没有&lt;code&gt;devfs&lt;/code&gt;，其指定的设备仅仅是一个编号，在&lt;code&gt;kernel&lt;/code&gt;源码中有对应，而不是真实的设备树设备，而且也不能支持通用驱动不能覆盖的各种复杂设备，复杂文件系统，故此时需要一个过渡。&lt;/p&gt;
+&lt;h4&gt;2. 早期用户空间&lt;/h4&gt;
+&lt;p&gt;查看&lt;code&gt;grub&lt;/code&gt;的配置可以发现&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;menuentry &apos;Arch Linux, with Linux linux&apos; --class arch --class gnu-linux --class gnu --class os $menuentry_id_option &apos;gnulinux-linux-advanced-a9c82f40-f0ff-4af3-b630-ddc3d0d0f781&apos; {
+		load_video
+		set gfxpayload=keep
+		insmod gzio
+		insmod part_gpt
+		insmod fat
+		search --no-floppy --fs-uuid --set=root BCB9-E525
+		echo	&apos;Loading Linux linux ...&apos;
+		linux	/vmlinuz-linux root=UUID=a9c82f40-f0ff-4af3-b630-ddc3d0d0f781 rw  loglevel=3 quiet
+		echo	&apos;Loading initial ramdisk ...&apos;
+		initrd	/amd-ucode.img /initramfs-linux.img
+	}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;除了启动内核用的&lt;code&gt;linux&lt;/code&gt;指令外，还有一个&lt;code&gt;initrd&lt;/code&gt;指令值得注意&lt;/p&gt;
+&lt;p&gt;为了解决上述问题，我们引入了一个&lt;code&gt;initrd(Initial RAM Disk)&lt;/code&gt;，由&lt;code&gt;bootloader&lt;/code&gt;（也可以是&lt;code&gt;kernel&lt;/code&gt;）在启动前加载入内存中，里面包含了一个完整的&lt;code&gt;ext2&lt;/code&gt;文件系统，内含基础的运行环境（通常是&lt;code&gt;busybox&lt;/code&gt;或&lt;code&gt;systemd&lt;/code&gt;），&lt;code&gt;kernel&lt;/code&gt;将其临时挂载为&lt;code&gt;rootfs&lt;/code&gt;，查找并启动初始化程序&lt;code&gt;\linuxrc&lt;/code&gt;，这就是&lt;code&gt;PID=1&lt;/code&gt;的&lt;strong&gt;第一个用户态进程&lt;/strong&gt;，操作系统从此进入用户态&lt;/p&gt;
+&lt;p&gt;当然，启动一个完整的文件系统还是会增加&lt;code&gt;kernel&lt;/code&gt;的复杂度，于是&lt;code&gt;linux 2.6&lt;/code&gt;引入了&lt;code&gt;initramfs(Initial RAM File System)&lt;/code&gt;，其实体是一个&lt;code&gt;cpio&lt;/code&gt;格式的压缩包，而不是一个完整的文件系统，在启动时&lt;code&gt;kernel&lt;/code&gt;会将其放到一个与&lt;code&gt;/run&lt;/code&gt;等一样的&lt;code&gt;ramfs(tmpfs)&lt;/code&gt;中，并将其挂载为&lt;code&gt;rootfs&lt;/code&gt;，然后启动&lt;code&gt;/init&lt;/code&gt;或&lt;code&gt;/sbin/init&lt;/code&gt;进入用户态&lt;/p&gt;
+&lt;p&gt;一些简单的嵌入式系统也会直接在这个临时的&lt;code&gt;rootfs&lt;/code&gt;上运行&lt;/p&gt;
+&lt;p&gt;所以，&lt;code&gt;/amd-ucode.img&lt;/code&gt;和&lt;code&gt;/initramfs-linux-img&lt;/code&gt;就是我们的&lt;code&gt;initramfs&lt;/code&gt;，前者仅包含&lt;code&gt;AMD&lt;/code&gt;的微码驱动，我们对后者进行解压&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;lsinitcpio -x /boot/initramfs-linux.img
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;得到&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;ls -lh
+-rw-r--r--   1 ztsubaki ztsubaki 4B    Aug 11 19:17 VERSION
+lrwxrwxrwx   1 ztsubaki ztsubaki 7B    Aug 11 19:17 bin -&amp;gt; usr/bin
+-rw-r--r--   1 ztsubaki ztsubaki 3.2K  Aug 11 19:17 buildconfig
+-rw-r--r--   1 ztsubaki ztsubaki 89B   Aug 11 19:17 config
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 dev
+-rw-r--r--   1 ztsubaki ztsubaki 2B    Aug 11 19:17 early_cpio
+drwxr-xr-x   3 ztsubaki ztsubaki 4.0K  Aug 11 19:17 etc
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 hooks
+-rwxr-xr-x   1 ztsubaki ztsubaki 3.2K  Aug 11 19:17 init
+-rw-r--r--   1 ztsubaki ztsubaki 15.2K Aug 11 19:17 init_functions
+drwxr-xr-x   3 ztsubaki ztsubaki 4.0K  Aug 11 19:17 kernel
+-rw-r--r--   1 ztsubaki ztsubaki 2.5K  Aug 11 19:17 keymap.bin
+-rw-r--r--   1 ztsubaki ztsubaki 0B    Aug 11 19:17 keymap.utf8
+lrwxrwxrwx   1 ztsubaki ztsubaki 7B    Aug 11 19:17 lib -&amp;gt; usr/lib
+lrwxrwxrwx   1 ztsubaki ztsubaki 7B    Aug 11 19:17 lib64 -&amp;gt; usr/lib
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 new_root
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 proc
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 run
+lrwxrwxrwx   1 ztsubaki ztsubaki 7B    Aug 11 19:17 sbin -&amp;gt; usr/bin
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 sys
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 tmp
+drwxr-xr-x   5 ztsubaki ztsubaki 4.0K  Aug 11 19:17 usr
+drwxr-xr-x   2 ztsubaki ztsubaki 4.0K  Aug 11 19:17 var
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这是一个完整的&lt;code&gt;rootfs&lt;/code&gt;结构&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;./bin/busybox
+BusyBox v1.36.1 () multi-call binary.
+BusyBox is copyrighted by many authors between 1998-2015.
+Licensed under GPLv2. See source distribution for detailed
+copyright notices.
+
+Usage: busybox [function [arguments]...]
+   or: busybox --list[-full]
+   or: busybox --show SCRIPT
+   or: busybox --install [-s] [DIR]
+   or: function [arguments]...
+
+	BusyBox is a multi-call binary that combines many common Unix
+	utilities into a single executable.  Most people will create a
+	link to busybox for each function they wish to use and BusyBox
+	will act like whatever it was invoked as.
+
+Currently defined functions:
+	[, arch, ascii, ash, awk, base32, base64, basename, bc, blkdiscard, bzip2, cat, chgrp, chmod, chown, chroot,
+	clear, cp, cpio, crc32, cttyhack, cut, dd, df, dirname, dmesg, du, echo, env, expr, fallocate, false, fatattr,
+	free, fsfreeze, fstrim, fsync, getopt, grep, gzip, halt, head, hexdump, hexedit, i2ctransfer, ifconfig, init,
+	install, ip, ipaddr, iplink, ipneigh, iproute, iprule, iptunnel, kbd_mode, kill, killall, less, link, ln,
+	loadfont, loadkmap, losetup, ls, lsscsi, lzop, md5sum, mim, mkdir, mkfifo, mknod, mkpasswd, mktemp, mountpoint,
+	mv, nc, netstat, nologin, nproc, nsenter, nslookup, nuke, openvt, partprobe, paste, pgrep, pidof, ping, ping6,
+	poweroff, printf, ps, pwd, readlink, realpath, reboot, resume, rm, rmdir, route, run-init, sed, seedrng, seq,
+	setfattr, setfont, sh, sha1sum, sha256sum, sha512sum, shuf, sleep, sort, stat, strings, sync, tac, tail, tar,
+	tcpsvd, tee, telnet, test, tftp, touch, tree, true, truncate, ts, tsort, udhcpc, udhcpc6, umount, uname, uniq,
+	unlink, unshare, unzip, uptime, vi, wc, wget, which, xxd, xz, yes
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;由&lt;code&gt;busybox&lt;/code&gt;提供基本运行环境&lt;/p&gt;
+&lt;p&gt;我们观察&lt;code&gt;init&lt;/code&gt;脚本&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cat init
+#!/usr/bin/ash
+# SPDX-License-Identifier: GPL-2.0-only
+
+export PATH=&apos;/usr/local/sbin:/usr/local/bin:/usr/bin&apos;
+
+udevd_running=0
+mount_handler=default_mount_handler
+init=/sbin/init
+rd_logmask=0
+
+. /init_functions
+
+mount_setup
+
+# parse the kernel command line
+parse_cmdline &amp;lt;/proc/cmdline
+
+# setup logging as early as possible
+rdlogger_start
+
+disablehooks=&quot;$(getarg disablehooks)&quot;
+# busybox ash supports string replacements
+# shellcheck disable=SC3060
+for d in ${disablehooks//,/ }; do
+    [ -e &quot;/hooks/$d&quot; ] &amp;amp;&amp;amp; chmod 644 &quot;/hooks/$d&quot;
+done
+
+# shellcheck disable=SC1091
+. /config
+
+# We rely on word splitting
+# shellcheck disable=SC2086
+run_hookfunctions &apos;run_earlyhook&apos; &apos;early hook&apos; $EARLYHOOKS
+
+if [ -n &quot;$earlymodules$MODULES&quot; ]; then
+    # busybox ash supports string replacements
+    # shellcheck disable=SC3060,SC2086
+    modprobe -qab ${earlymodules//,/ } $MODULES
+fi
+
+# We rely on word splitting
+# shellcheck disable=SC2086
+run_hookfunctions &apos;run_hook&apos; &apos;hook&apos; $HOOKS
+
+# honor the old behavior of break=y as a synonym for break=premount
+break=&quot;$(getarg break)&quot;
+if [ &quot;${break}&quot; = &quot;y&quot; ] || [ &quot;${break}&quot; = &quot;premount&quot; ]; then
+    # shellcheck disable=SC2086
+    run_hookfunctions &apos;run_emergencyhook&apos; &apos;emergency hook&apos; $EMERGENCYHOOKS
+    echo &quot;:: Pre-mount break requested, type &apos;exit&apos; to resume operation&quot;
+    launch_interactive_shell
+fi
+
+if rootdev=&quot;$(resolve_device &quot;$root&quot;)&quot;; then
+    # If the tag is supported by util-linux mount, pass it as is.
+    # Otherwise, use the resolved device path.
+    case &quot;$root&quot; in
+        &apos;UUID=&apos;* | &apos;LABEL=&apos;* | &apos;PARTUUID=&apos;* | &apos;PARTLABEL=&apos;*) : ;;
+        *) root=&quot;$rootdev&quot; ;;
+    esac
+fi
+unset rootdev
+
+fsck_root
+
+# Mount root at /new_root
+&quot;$mount_handler&quot; /new_root
+
+# We rely on word splitting
+# shellcheck disable=SC2086
+run_hookfunctions &apos;run_latehook&apos; &apos;late hook&apos; $LATEHOOKS
+
+# We rely on word splitting
+# shellcheck disable=SC2086
+run_hookfunctions &apos;run_cleanuphook&apos; &apos;cleanup hook&apos; $CLEANUPHOOKS
+
+if [ &quot;$(stat -c %D /)&quot; = &quot;$(stat -c %D /new_root)&quot; ]; then
+    # Nothing got mounted on /new_root. This is the end, we don&apos;t know what to do anymore
+    # We fall back into a shell, but the shell has now PID 1
+    # This way, manual recovery is still possible.
+    # shellcheck disable=SC2086
+    run_hookfunctions &apos;run_emergencyhook&apos; &apos;emergency hook&apos; $EMERGENCYHOOKS
+    err &quot;Failed to mount the real root device.&quot;
+    echo &quot;Bailing out, you are on your own. Good luck.&quot;
+    echo
+    launch_interactive_shell --exec
+elif [ ! -x &quot;/new_root${init}&quot; ]; then
+    # Successfully mounted /new_root, but ${init} is missing
+    # The same logic as above applies
+    # shellcheck disable=SC2086
+    run_hookfunctions &apos;run_emergencyhook&apos; &apos;emergency hook&apos; $EMERGENCYHOOKS
+    err &quot;Root device mounted successfully, but ${init} does not exist.&quot;
+    echo &quot;Bailing out, you are on your own. Good luck.&quot;
+    echo
+    launch_interactive_shell --exec
+fi
+
+if [ &quot;${break}&quot; = &quot;postmount&quot; ]; then
+    # shellcheck disable=SC2086
+    run_hookfunctions &apos;run_emergencyhook&apos; &apos;emergency hook&apos; $EMERGENCYHOOKS
+    echo &quot;:: Post-mount break requested, type &apos;exit&apos; to resume operation&quot;
+    launch_interactive_shell
+fi
+
+# this should always be the last thing we do before the switch_root.
+rdlogger_stop
+
+exec env -i \
+    &quot;TERM=$TERM&quot; \
+    /usr/bin/switch_root /new_root &quot;$init&quot; &quot;$@&quot;
+
+# vim: set ft=sh ts=4 sw=4 et:
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可见&lt;code&gt;init&lt;/code&gt;主要加载了一些在&lt;code&gt;/etc/mkinitcpio.conf&lt;/code&gt;（&lt;code&gt;Arch Linux&lt;/code&gt;的&lt;code&gt;initramfs&lt;/code&gt;由该程序生成）中配置的模块，运行了一些钩子，最关键的，是&lt;code&gt;mount_setup&lt;/code&gt;函数：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mount_setup() {
+    mount -t proc proc /proc -o nosuid,noexec,nodev
+    mount -t sysfs sys /sys -o nosuid,noexec,nodev
+    mount -t devtmpfs dev /dev -o mode=0755,nosuid
+    mount -t tmpfs run /run -o nosuid,nodev,mode=0755
+    mkdir -m755 /run/initramfs
+
+    if [ -e /sys/firmware/efi ]; then
+        mount -t efivarfs efivarfs /sys/firmware/efi/efivars -o nosuid,nodev,noexec
+    fi
+
+    # Setup /dev symlinks
+    if [ -e /proc/kcore ]; then
+        ln -sfT /proc/kcore /dev/core
+    fi
+    ln -sfT /proc/self/fd /dev/fd
+    ln -sfT /proc/self/fd/0 /dev/stdin
+    ln -sfT /proc/self/fd/1 /dev/stdout
+    ln -sfT /proc/self/fd/2 /dev/stderr
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该函数挂载了一些系统运行中产生的特殊目录，而&lt;code&gt;init&lt;/code&gt;也会处理内核参数并寻找挂载真正的&lt;code&gt;rootfs&lt;/code&gt;到&lt;code&gt;/new_root&lt;/code&gt;（对于&lt;code&gt;systemd&lt;/code&gt;的&lt;code&gt;initramfs&lt;/code&gt;通常是&lt;code&gt;/sysroot&lt;/code&gt;），最终通过&lt;code&gt;switch_root&lt;/code&gt;（&lt;code&gt;systemd&lt;/code&gt;的&lt;code&gt;systemd switch-root&lt;/code&gt;）将&lt;code&gt;/new_root&lt;/code&gt;（&lt;code&gt;/sysroot&lt;/code&gt;）切换为新的&lt;code&gt;rootfs&lt;/code&gt;（由于磁盘上不存在前面挂载过的特殊目录，故前面的挂载不会被覆盖，依然有效），然后该进程启动真正的&lt;code&gt;rootfs&lt;/code&gt;上的&lt;code&gt;/sbin/init&lt;/code&gt;（通常为&lt;code&gt;systemd&lt;/code&gt;的符号链接）进入我们所熟悉的晚期用户空间&lt;/p&gt;
+&lt;p&gt;值得注意的是，我们启动了这么多进程，最终进入晚期用户空间时第一个进程仍然是&lt;code&gt;PID=1&lt;/code&gt;，这是因为为了标识该进程的独特性，&lt;code&gt;switch_root&lt;/code&gt;只允许&lt;code&gt;PID=1&lt;/code&gt;的进程运行，&lt;code&gt;systemd&lt;/code&gt;也只有&lt;code&gt;PID=1&lt;/code&gt;运行时才会进行初始化的工作，所以在前面的过程中，&lt;code&gt;init&lt;/code&gt;启动&lt;code&gt;switch_root&lt;/code&gt;使用的是&lt;code&gt;exec&lt;/code&gt;，&lt;code&gt;switch_root&lt;/code&gt;启动&lt;code&gt;systemd&lt;/code&gt;用的也是&lt;code&gt;exec&lt;/code&gt;&lt;/p&gt;
+&lt;h4&gt;3. 晚期用户空间&lt;/h4&gt;
+&lt;p&gt;进入晚期用户空间时我们已经获得了一个完整的&lt;code&gt;Linux&lt;/code&gt;系统，接下来要做的就简单了，&lt;code&gt;systemd&lt;/code&gt;根据规则初始化系统服务，然后启动&lt;code&gt;getty&lt;/code&gt;（或者显示管理器），&lt;code&gt;getty&lt;/code&gt;会利用&lt;code&gt;glibc&lt;/code&gt;封装的系统调用接口根据&lt;code&gt;/etc/shadow&lt;/code&gt;验证我们的密码，然后通过&lt;code&gt;setuid&lt;/code&gt;实现登录并调用&lt;code&gt;login&lt;/code&gt;，&lt;code&gt;login&lt;/code&gt;显示&lt;code&gt;motd&lt;/code&gt;并启动用户在&lt;code&gt;/etc/passwd&lt;/code&gt;中指定的&lt;code&gt;shell&lt;/code&gt;，至此系统成功进入&lt;code&gt;shell&lt;/code&gt;&lt;/p&gt;
+&lt;h2&gt;2. 实操&lt;/h2&gt;
+&lt;p&gt;接下来，我们来从源代码开始，用&lt;code&gt;qemu&lt;/code&gt;引导一个简易&lt;code&gt;Linux&lt;/code&gt;系统&lt;/p&gt;
+&lt;h3&gt;编译&lt;code&gt;Linux&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;从科大源下载&lt;code&gt;linux&lt;/code&gt;源码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git clone --depth=1 https://mirrors.ustc.edu.cn/linux.git
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd linux
+make defconfig
+scripts/config --disable DEBUG_INFO --enable VIRTIO
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;默认配置关闭&lt;code&gt;debug&lt;/code&gt;信息，打开&lt;code&gt;VirtIO&lt;/code&gt;驱动&lt;/p&gt;
+&lt;p&gt;编译&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;make -j `nproc`
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;等待数分钟即可&lt;/p&gt;
+&lt;p&gt;编译好的内核位于&lt;code&gt;arch/x86_64/boot/bzImage&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;编译&lt;code&gt;busybox&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;下载&lt;code&gt;busybox&lt;/code&gt;源码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd ..
+wget https://busybox.net/downloads/busybox-1.37.0.tar.bz2
+tar -xvf ./busybox-1.37.0.tar.bz2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;配置&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd 
+make menuconfig
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;由于配置脚本存在&lt;code&gt;bug&lt;/code&gt;，可能需要手动修改&lt;code&gt;scripts/kconfig/lxdialog/check-lxdialog.sh&lt;/code&gt;中的&lt;code&gt;check()&lt;/code&gt;函数，为用于检测的代码中的&lt;code&gt;main&lt;/code&gt;函数加入&lt;code&gt;int&lt;/code&gt;返回值&lt;/p&gt;
+&lt;p&gt;选择&lt;code&gt;Settings-&amp;gt;Build static binary (no shared libs)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;编译&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;make -j `nproc`
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可能需要删除&lt;code&gt;networking/tc.c&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;安装&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;make install CONFIG_PREFIX=../initramfs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;记得设置权限&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo chown -R root:root ../initramfs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;制作&lt;code&gt;initramfs&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;编写脚本&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd ../initramfs
+sudo vim init
+
+## 脚本内容如下
+
+#!/bin/sh
+
+mkdir /dev
+mkdir /proc
+mkdir /sys
+mkdir /run
+
+mount -t devtmpfs dev /dev
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+mount -t tmpfs run /run
+
+exec ./linuxrc
+
+## 脚本内容结束
+sudo chmod +x ./init
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;脚本挂载了一些特殊目录，然后启动&lt;code&gt;busybox&lt;/code&gt;的初始化脚本&lt;/p&gt;
+&lt;p&gt;接着打包&lt;code&gt;initramfs&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;find . | cpio -H newc -o | gzip &amp;gt; ../initramfs.img
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;启动&lt;code&gt;busybox&lt;/code&gt;&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;
+cd ..
+qemu-system-x86_64 -kernel ./linux/arch/x86_64/boot/bzImage\
+    -initrd ./initramfs.img\
+    -append &quot;console=ttyS0&quot;\
+    -enable-kvm -nographic
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;接下来就是启动过程，当出现&lt;code&gt;Please press Enter to activate this console.&lt;/code&gt;时就代表我们成功进入了&lt;code&gt;busybox&lt;/code&gt;的系统&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[!TIP]&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;busybox&lt;/code&gt;中使用&lt;code&gt;poweroff&lt;/code&gt;关机&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;进入硬盘系统&lt;/h3&gt;
+&lt;p&gt;到这里还不够，我们只是在内存中的&lt;code&gt;busybox&lt;/code&gt;中运行，我们最初的目的是希望&lt;code&gt;initramfs&lt;/code&gt;切换到一般的&lt;code&gt;rootfs&lt;/code&gt;上&lt;/p&gt;
+&lt;p&gt;首先，我们需要寻找一套合适的基础组件，可以继续使用&lt;code&gt;busybox&lt;/code&gt;，这里以&lt;code&gt;debian&lt;/code&gt;为例&lt;/p&gt;
+&lt;p&gt;下载&lt;code&gt;debian&lt;/code&gt;基础组件&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo debootstrap --verbose bookworm rootfs https://mirrors.ustc.edu.cn/debian/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;该步骤会在&lt;code&gt;rootfs&lt;/code&gt;目录下产生一个&lt;code&gt;debian&lt;/code&gt;的&lt;code&gt;rootfs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;记得删除&lt;code&gt;root&lt;/code&gt;的密码以便登录&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo vim roofs/etc/shadow
+
+## 第一行删去*
+root::20311:0:99999:7:::
+##
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;接下来制作&lt;code&gt;qemu&lt;/code&gt;的虚拟磁盘，把数据拷进去&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;qemu-img create -f qcow2 disk.qcow 10G
+sudo qemu-nbd -c /dev/nbd0 ./disk.qcow
+sudo fdisk /dev/nbd0
+
+## 在fdsik中
+g
+n
+#一路回车
+w
+## 退出fdisk
+
+sudo mkfs.ext4 /dev/nbd0p1
+sudo mount /dev/nbd0p1 /mnt/tmp
+sudo rsync -a rootfs/ /mnt/tmp
+sudo umount /dev/nbd0p1
+sudo qemu-nbd -d /dev/nbd0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;再次启动&lt;code&gt;qemu&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;qemu-system-x86_64 -kernel ./linux/arch/x86_64/boot/bzImage\
+    -initrd ./initramfs.img\
+    -append &quot;console=ttyS0&quot;\
+    -drive file=disk.qcow,format=qcow2\
+    -enable-kvm -nographic
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这次额外挂载了虚拟磁盘&lt;/p&gt;
+&lt;p&gt;查看&lt;code&gt;uuid&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;~ # blkid
+/dev/sda1: UUID=&quot;31333e20-4746-412c-be8e-e478ca16f04b&quot; TYPE=&quot;ext4&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;接下来退出&lt;code&gt;qemu&lt;/code&gt;，再次编辑&lt;code&gt;init&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#!/bin/sh
+
+mkdir /dev
+mkdir /proc
+mkdir /sys
+mkdir /run
+
+mount -t devtmpfs dev /dev
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+mount -t tmpfs run /run
+
+for arg in $(cat /proc/cmdline)
+do
+    if [ ${arg:0:10} = &apos;root=UUID=&apos; ]
+    then
+        uuid=${arg:10}
+    fi
+done
+
+if [ -z $uuid ]
+then
+	exec ./linuxrc
+else
+	mkdir /new_root
+	mount UUID=$uuid /new_root
+	exec switch_root /new_root /sbin/init
+fi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;我们增加了根据&lt;code&gt;kernel&lt;/code&gt;的启动参数挂载&lt;code&gt;rootfs&lt;/code&gt;并切换的功能，其中&lt;code&gt;/sbin/init&lt;/code&gt;就是新&lt;code&gt;rootfs&lt;/code&gt;下的&lt;code&gt;init&lt;/code&gt;（此处即&lt;code&gt;systemd&lt;/code&gt;）&lt;/p&gt;
+&lt;p&gt;接着，在启动参数添加上&lt;code&gt;uuid&lt;/code&gt;并运行&lt;code&gt;qemu&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;qemu-system-x86_64 -kernel ./linux/arch/x86_64/boot/bzImage\
+    -initrd ./initramfs.img\
+    -append &quot;console=ttyS0 root=UUID=31333e20-4746-412c-be8e-e478ca16f04b&quot;\
+    -drive file=disk.qcow,format=qcow2\
+    -enable-kvm -nographic\
+    -m 4096 -smp 2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;为了流畅运行&lt;code&gt;debain&lt;/code&gt;，我们还添加了一些参数&lt;/p&gt;
+&lt;p&gt;观察日志可以发现，在前面应该启动&lt;code&gt;busybox&lt;/code&gt;的地方，我们的脚本直接运行了&lt;code&gt;switch_root&lt;/code&gt;，然后就进入了&lt;code&gt;systemd&lt;/code&gt;启动系统的过程，最终进入了&lt;code&gt;debian&lt;/code&gt;系统（&lt;code&gt;hostname&lt;/code&gt;会继承自本机）&lt;/p&gt;
+&lt;p&gt;直接登录&lt;code&gt;root&lt;/code&gt;即可进入系统&lt;/p&gt;
+</content:encoded></item><item><title>Linux SUID与shell脚本问题</title><link>https://www.ztsubaki.top/posts/26/26/</link><guid isPermaLink="true">https://www.ztsubaki.top/posts/26/26/</guid><description>SUID是Linux的一个特殊权限，但是不能在脚本中使用</description><pubDate>Tue, 24 Jun 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;1. uid与SUID&lt;/h2&gt;
 &lt;h3&gt;1.1. uid&lt;/h3&gt;
 &lt;p&gt;Linux使用&lt;code&gt;uid&lt;/code&gt;标识用户，每个用户有一个唯一的&lt;code&gt;uid&lt;/code&gt;，&lt;code&gt;root&lt;/code&gt;的&lt;code&gt;uid&lt;/code&gt;为0，其他可登录用户的&lt;code&gt;uid&lt;/code&gt;一般从1000开始，使用&lt;code&gt;id&lt;/code&gt;指令可以查看自己的&lt;code&gt;uid&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;实际上一个进程运行中主要有3个&lt;code&gt;uid&lt;/code&gt;，分别是&lt;code&gt;real uid&lt;/code&gt;，&lt;code&gt;saved uid&lt;/code&gt;和&lt;code&gt;effective uid&lt;/code&gt;，&lt;code&gt;real uid&lt;/code&gt;用于表示进程的实际调用者，&lt;code&gt;saved uid&lt;/code&gt;用于在切换用户时保存&lt;code&gt;uid&lt;/code&gt;，&lt;code&gt;effective uid&lt;/code&gt;则是真正进行访问控制的&lt;code&gt;uid&lt;/code&gt;，所有权限都是基于&lt;code&gt;effective uid&lt;/code&gt;的，这才是实际有用的&lt;code&gt;uid&lt;/code&gt;&lt;/p&gt;
